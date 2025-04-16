@@ -1,0 +1,205 @@
+<!-- cliente/credenciales/lista.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Credenciales - Sistema de Credenciales</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/animaciones.css">
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="bg-light">
+  <!-- Header común -->
+  <header class="header-app bg-primary text-white p-3 shadow">
+    <div class="container d-flex align-items-center">
+      <img src="../img/logo.png" alt="Logo" class="me-3" style="height:50px;">
+      <h1 class="h4 m-0 flex-grow-1">Sistema de Credenciales</h1>
+      <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person-circle me-1"></i> <span id="nombreUsuario">Usuario</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+          <li><button class="dropdown-item" id="btnLogout"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navegación -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="../dashboard.html"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#"><i class="bi bi-person-vcard me-1"></i> Credenciales</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../plantillas/lista.html"><i class="bi bi-layout-text-window me-1"></i> Plantillas</a>
+          </li>
+          <li class="nav-item" id="menuOperadores" style="display: none;">
+            <a class="nav-link" href="../operadores/lista.html"><i class="bi bi-people me-1"></i> Operadores</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <main class="container py-4 fade-in">
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <h2 class="mb-0"><i class="bi bi-person-vcard me-2"></i>Credenciales</h2>
+          <a href="crear.html" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Nueva Credencial
+          </a>
+        </div>
+        <hr>
+      </div>
+    </div>
+
+    <!-- Buscador -->
+    <div class="row mb-4">
+      <div class="col-md-8 col-lg-6 mx-auto">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="input-group">
+              <input type="text" class="form-control" id="searchCredencial" placeholder="Buscar por nombre, número de nómina, NSS o RFC">
+              <button class="btn btn-primary" id="btnSearch"><i class="bi bi-search"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de credenciales -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Foto</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Número de Nómina</th>
+                    <th scope="col">NSS</th>
+                    <th scope="col">RFC</th>
+                    <th scope="col" class="text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="credencialesTableBody">
+                  <tr>
+                    <td colspan="7" class="text-center py-4">
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                      </div>
+                      <p class="mt-2">Cargando credenciales...</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paginación -->
+    <div class="row mt-4">
+      <div class="col-12">
+        <nav aria-label="Paginación de credenciales">
+          <ul class="pagination justify-content-center" id="paginacion">
+            <li class="page-item disabled">
+              <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+            </li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item disabled">
+              <a class="page-link" href="#">Siguiente</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white py-3 mt-auto border-top">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <span class="text-muted">Sistema de Credenciales &copy; 2025</span>
+        </div>
+        <div>
+          <span class="text-muted">Versión 1.0</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal de confirmación para eliminar -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar eliminación</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Está seguro que desea eliminar la credencial de <strong id="deleteUserName"></strong>?</p>
+          <p class="text-danger"><small>Esta acción no se puede deshacer.</small></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="btnConfirmDelete">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para acciones rápidas de impresión -->
+  <div class="modal fade" id="printModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="bi bi-printer-fill me-2"></i>Imprimir Credencial</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="selectTemplatePrint" class="form-label">Seleccionar Plantilla</label>
+            <select class="form-select" id="selectTemplatePrint">
+              <option value="" selected disabled>Seleccione una plantilla</option>
+            </select>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-success" id="btnDirectPrint">
+              <i class="bi bi-printer me-1"></i> Imprimir Ahora
+            </button>
+            <button type="button" class="btn btn-primary" id="btnGeneratePDF">
+              <i class="bi bi-file-pdf me-1"></i> Generar PDF
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/utilidades/api.js"></script>
+  <script src="../js/credenciales/lista.js"></script>
+</body>
+</html>

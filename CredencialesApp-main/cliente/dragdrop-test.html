@@ -1,0 +1,285 @@
+<!-- cliente/dragdrop-test.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test de Drag & Drop</title>
+  <style>
+    #container {
+      width: 500px;
+      height: 300px;
+      border: 2px solid #333;
+      position: relative;
+      margin: 50px auto;
+      background-color: #f5f5f5;
+    }
+    
+    .draggable {
+      position: absolute;
+      padding: 10px;
+      background-color: #0d6efd;
+      color: white;
+      cursor: move;
+      min-width: 50px;
+      min-height: 20px;
+      user-select: none;
+      border: 1px solid transparent;
+    }
+    
+    .draggable.element-selected {
+      border: 1px dashed #ff0000;
+      z-index: 100;
+    }
+    
+    .draggable.element-dragging {
+      opacity: 0.8;
+      z-index: 200;
+    }
+    
+    .log {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      height: 100px;
+      overflow-y: auto;
+      font-family: monospace;
+    }
+    
+    .controls {
+      margin: 20px 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <button id="addElement">Añadir Elemento</button>
+    <button id="removeElement">Eliminar Seleccionado</button>
+  </div>
+
+  <div id="container"></div>
+  
+  <div class="log" id="log"></div>
+
+  <script>
+    class DragAndDrop {
+      constructor(container, options = {}) {
+        this.container = container;
+        this.options = Object.assign({
+          draggableSelector: '.draggable',
+          onDragStart: null,
+          onDragEnd: null,
+          onSelect: null,
+          onMove: null
+        }, options);
+        
+        // Estado
+        this.selected = null;
+        this.initialX = 0;
+        this.initialY = 0;
+        this.offsetX = 0;
+        this.offsetY = 0;
+        this.isDragging = false;
+        
+        // Inicializar eventos
+        this.init();
+      }
+      
+      init() {
+        // Añadir listeners de eventos
+        this.container.addEventListener('mousedown', this.handleMouseDown.bind(this));
+        document.addEventListener('mousemove', this.handleMouseMove.bind(this));
+        document.addEventListener('mouseup', this.handleMouseUp.bind(this));
+      }
+      
+      handleMouseDown(e) {
+        // Encontrar elemento arrastrable
+        const draggable = e.target.closest(this.options.draggableSelector);
+        if (!draggable) return;
+        
+        e.preventDefault();
+        
+        // Seleccionar el elemento
+        this.selectElement(draggable);
+        
+        // Iniciar arrastre
+        this.isDragging = true;
+        
+        // Calcular offsets iniciales
+        const rect = draggable.getBoundingClientRect();
+        this.offsetX = e.clientX - rect.left;
+        this.offsetY = e.clientY - rect.top;
+        
+        // Guardar posición inicial
+        this.initialX = parseInt(draggable.style.left) || 0;
+        this.initialY = parseInt(draggable.style.top) || 0;
+        
+        // Añadir clase de arrastre
+        draggable.classList.add('element-dragging');
+        
+        // Log de diagnóstico
+        this.log(`Mouse down: offsetX=${this.offsetX}, offsetY=${this.offsetY}`);
+        
+        // Callback
+        if (this.options.onDragStart) {
+          this.options.onDragStart(draggable);
+        }
+      }
+      
+      handleMouseMove(e) {
+        if (!this.isDragging || !this.selected) return;
+        
+        e.preventDefault();
+        
+        // Calcular nueva posición dentro del contenedor
+        const containerRect = this.container.getBoundingClientRect();
+        const x = e.clientX - containerRect.left - this.offsetX;
+        const y = e.clientY - containerRect.top - this.offsetY;
+        
+        // Aplicar nueva posición
+        this.selected.style.left = `${x}px`;
+        this.selected.style.top = `${y}px`;
+        
+        // Callback
+        if (this.options.onMove) {
+          this.options.onMove(this.selected);
+        }
+      }
+      
+      handleMouseUp(e) {
+        if (!this.isDragging) return;
+        
+        e.preventDefault();
+        
+        // Finalizar arrastre
+        this.isDragging = false;
+        
+        if (this.selected) {
+          this.selected.classList.remove('element-dragging');
+          
+          // Log de diagnóstico
+          this.log(`Elemento posicionado en left=${this.selected.style.left}, top=${this.selected.style.top}`);
+          
+          // Callback
+          if (this.options.onDragEnd) {
+            this.options.onDragEnd(this.selected);
+          }
+        }
+      }
+      
+      selectElement(element) {
+        // Quitar selección previa
+        if (this.selected) {
+          this.selected.classList.remove('element-selected');
+        }
+        
+        // Establecer nueva selección
+        this.selected = element;
+        element.classList.add('element-selected');
+        
+        // Log de diagnóstico
+        this.log(`Elemento seleccionado: id=${element.id}`);
+        
+        // Callback
+        if (this.options.onSelect) {
+          this.options.onSelect(element);
+        }
+      }
+      
+      addElement(element, x = 50, y = 50) {
+        // Posicionar elemento
+        element.style.position = 'absolute';
+        element.style.left = `${x}px`;
+        element.style.top = `${y}px`;
+        
+        // Añadir al contenedor
+        this.container.appendChild(element);
+        
+        // Log de diagnóstico
+        this.log(`Elemento añadido en left=${x}px, top=${y}px`);
+        
+        return element;
+      }
+      
+      removeSelected() {
+        if (this.selected) {
+          const id = this.selected.id;
+          this.selected.remove();
+          this.selected = null;
+          
+          // Log de diagnóstico
+          this.log(`Elemento eliminado: id=${id}`);
+        }
+      }
+      
+      log(message) {
+        if (this.options.onLog) {
+          this.options.onLog(message);
+        }
+      }
+    }
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('container');
+      const logElement = document.getElementById('log');
+      const addButton = document.getElementById('addElement');
+      const removeButton = document.getElementById('removeElement');
+      
+      let counter = 1;
+      
+      // Función para añadir mensaje al log
+      function logMessage(message) {
+        const time = new Date().toLocaleTimeString();
+        const logItem = document.createElement('div');
+        logItem.textContent = `[${time}] ${message}`;
+        logElement.appendChild(logItem);
+        logElement.scrollTop = logElement.scrollHeight;
+      }
+      
+      // Inicializar drag & drop
+      const dd = new DragAndDrop(container, {
+        onDragStart: (el) => logMessage(`Iniciado arrastre de ${el.id}`),
+        onDragEnd: (el) => logMessage(`Finalizado arrastre de ${el.id}`),
+        onSelect: (el) => logMessage(`Seleccionado ${el.id}`),
+        onMove: (el) => {},
+        onLog: logMessage
+      });
+      
+      // Añadir elemento al hacer clic en el botón
+      addButton.addEventListener('click', () => {
+        const element = document.createElement('div');
+        element.className = 'draggable';
+        element.id = `item-${counter++}`;
+        element.textContent = `Item ${counter-1}`;
+        
+        // Posición aleatoria
+        const x = Math.floor(Math.random() * 400);
+        const y = Math.floor(Math.random() * 200);
+        
+        dd.addElement(element, x, y);
+      });
+      
+      // Eliminar elemento seleccionado
+      removeButton.addEventListener('click', () => {
+        dd.removeSelected();
+      });
+      
+      // Añadir algunos elementos iniciales
+      for (let i = 1; i <= 3; i++) {
+        const element = document.createElement('div');
+        element.className = 'draggable';
+        element.id = `item-${counter++}`;
+        element.textContent = `Item ${counter-1}`;
+        
+        const x = 50 + (i-1) * 120;
+        const y = 50 + (i-1) * 60;
+        
+        dd.addElement(element, x, y);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,461 @@
+<!-- cliente/plantillas/editor.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor de Plantilla - Sistema de Credenciales</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/animaciones.css">
+  <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/editor.css">
+</head>
+<body class="bg-light">
+  <!-- Header común -->
+  <header class="header-app bg-primary text-white p-3 shadow">
+    <div class="container d-flex align-items-center">
+      <img src="../img/logo.png" alt="Logo" class="me-3" style="height:50px;">
+      <h1 class="h4 m-0 flex-grow-1">Sistema de Credenciales</h1>
+      <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person-circle me-1"></i> <span id="nombreUsuario">Usuario</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+          <li><button class="dropdown-item" id="btnLogout"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navegación -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="../dashboard.html"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../credenciales/lista.html"><i class="bi bi-person-vcard me-1"></i> Credenciales</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="lista.html"><i class="bi bi-layout-text-window me-1"></i> Plantillas</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#"><i class="bi bi-pencil-square me-1"></i> Editor de Plantilla</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <main class="container py-4 fade-in">
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <h2 class="mb-0" id="editorTitle"><i class="bi bi-plus-circle me-2"></i>Nueva Plantilla</h2>
+          <div>
+            <a href="lista.html" class="btn btn-outline-secondary me-2">
+              <i class="bi bi-arrow-left me-1"></i> Volver
+            </a>
+            <button class="btn btn-primary" id="btnSaveTemplate">
+              <i class="bi bi-save me-1"></i> Guardar Plantilla
+            </button>
+          </div>
+        </div>
+        <hr>
+      </div>
+    </div>
+
+    <!-- Nombre de la plantilla -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="mb-3">
+              <label for="templateName" class="form-label">Nombre de la Plantilla</label>
+              <input type="text" class="form-control" id="templateName" placeholder="Ej: Plantilla Estándar" required>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editor de Credencial (Frente y Reverso) -->
+    <div class="row">
+      <div class="col-12 mb-3">
+        <ul class="nav nav-tabs" id="credentialTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="front-tab" data-bs-toggle="tab" data-bs-target="#front" type="button" role="tab" aria-controls="front" aria-selected="true">
+              <i class="bi bi-card-heading me-1"></i> Frente
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="back-tab" data-bs-toggle="tab" data-bs-target="#back" type="button" role="tab" aria-controls="back" aria-selected="false">
+              <i class="bi bi-card-text me-1"></i> Reverso
+            </button>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-8">
+        <div class="tab-content" id="credentialTabContent">
+          <!-- Frente de la credencial -->
+          <div class="tab-pane fade show active" id="front" role="tabpanel" aria-labelledby="front-tab">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <div class="credential-container">
+                  <div class="credential-side credential-front" id="frontEditor">
+                    <!-- Aquí se cargarán los elementos de la plantilla (frente) -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Reverso de la credencial -->
+          <div class="tab-pane fade" id="back" role="tabpanel" aria-labelledby="back-tab">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <div class="credential-container">
+                  <div class="credential-side credential-back" id="backEditor">
+                    <!-- Aquí se cargarán los elementos de la plantilla (reverso) -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Panel de herramientas -->
+      <div class="col-md-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="bi bi-tools me-2"></i>Herramientas</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-2 mb-4">
+              <button class="btn btn-outline-primary" id="btnAddText">
+                <i class="bi bi-type me-1"></i> Agregar Texto
+              </button>
+              <button class="btn btn-outline-primary" id="btnAddImage">
+                <i class="bi bi-image me-1"></i> Agregar Imagen
+              </button>
+              <button class="btn btn-outline-primary" id="btnAddRect">
+                <i class="bi bi-square me-1"></i> Agregar Rectángulo
+              </button>
+              <button class="btn btn-outline-primary" id="btnAddLine">
+                <i class="bi bi-dash-lg me-1"></i> Agregar Línea
+              </button>
+              <button class="btn btn-outline-primary" id="btnAddPlaceholder">
+                <i class="bi bi-person-badge me-1"></i> Agregar Campo de Datos
+              </button>
+              <button class="btn btn-outline-danger" id="btnDelete">
+                <i class="bi bi-trash me-1"></i> Eliminar Elemento
+              </button>
+            </div>
+            
+            <!-- Panel de propiedades -->
+            <div id="propertiesPanel">
+              <h6 class="border-bottom pb-2 mb-3">Propiedades del elemento</h6>
+              
+              <!-- Propiedades generales (posición, tamaño) -->
+              <div class="mb-3">
+                <label class="form-label">Posición</label>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text">X</span>
+                      <input type="number" class="form-control" id="propX" min="0">
+                      <span class="input-group-text">px</span>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text">Y</span>
+                      <input type="number" class="form-control" id="propY" min="0">
+                      <span class="input-group-text">px</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label">Tamaño</label>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text">W</span>
+                      <input type="number" class="form-control" id="propWidth" min="1">
+                      <span class="input-group-text">px</span>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text">H</span>
+                      <input type="number" class="form-control" id="propHeight" min="1">
+                      <span class="input-group-text">px</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Propiedades específicas para texto -->
+              <div id="textProperties" style="display: none;">
+                <div class="mb-3">
+                  <label for="propText" class="form-label">Texto</label>
+                  <input type="text" class="form-control form-control-sm" id="propText">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="propFontSize" class="form-label">Tamaño de fuente</label>
+                  <div class="input-group input-group-sm">
+                    <input type="number" class="form-control" id="propFontSize" min="8" max="72">
+                    <span class="input-group-text">px</span>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="propFontFamily" class="form-label">Fuente</label>
+                  <select class="form-select form-select-sm" id="propFontFamily">
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="Verdana, sans-serif">Verdana</option>
+                    <option value="'Libre Barcode 39', cursive">Código de Barras (Code 39)</option>
+                  </select>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="propTextColor" class="form-label">Color</label>
+                  <input type="color" class="form-control form-control-sm" id="propTextColor">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="propTextAlign" class="form-label">Alineación</label>
+                  <div class="btn-group w-100" role="group">
+                    <input type="radio" class="btn-check" name="textAlign" id="alignLeft" value="left" checked>
+                    <label class="btn btn-outline-secondary btn-sm" for="alignLeft"><i class="bi bi-text-left"></i></label>
+                    
+                    <input type="radio" class="btn-check" name="textAlign" id="alignCenter" value="center">
+                    <label class="btn btn-outline-secondary btn-sm" for="alignCenter"><i class="bi bi-text-center"></i></label>
+                    
+                    <input type="radio" class="btn-check" name="textAlign" id="alignRight" value="right">
+                    <label class="btn btn-outline-secondary btn-sm" for="alignRight"><i class="bi bi-text-right"></i></label>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="propBold">
+                    <label class="form-check-label" for="propBold">
+                      <i class="bi bi-type-bold"></i> Negrita
+                    </label>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Propiedades específicas para campos de datos -->
+              <div id="placeholderProperties" style="display: none;">
+                <div class="mb-3">
+                  <label for="propPlaceholderField" class="form-label">Campo de datos</label>
+                  <select class="form-select form-select-sm" id="propPlaceholderField">
+                    <option value="{{nombre}}">Nombre</option>
+                    <option value="{{apellidos}}">Apellidos</option>
+                    <option value="{{numero_nomina}}">Número de Nómina</option>
+                    <option value="{{numero_seguridad_social}}">NSS</option>
+                    <option value="{{rfc}}">RFC</option>
+                  </select>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="propPlaceholderSize" class="form-label">Tamaño de fuente</label>
+                  <div class="input-group input-group-sm">
+                    <input type="number" class="form-control" id="propPlaceholderSize" min="8" max="72">
+                    <span class="input-group-text">px</span>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="propPlaceholderFamily" class="form-label">Fuente</label>
+                  <select class="form-select form-select-sm" id="propPlaceholderFamily">
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="Verdana, sans-serif">Verdana</option>
+                    <option value="'Libre Barcode 39', cursive">Código de Barras (Code 39)</option>
+                  </select>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="propPlaceholderColor" class="form-label">Color</label>
+                  <input type="color" class="form-control form-control-sm" id="propPlaceholderColor">
+                </div>
+              </div>
+
+              <!-- Propiedades específicas para líneas -->
+              <div id="lineProperties" style="display: none;">
+                <div class="mb-3">
+                  <label for="propLineColor" class="form-label">Color de línea</label>
+                  <input type="color" class="form-control form-control-sm" id="propLineColor">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="propLineWidth" class="form-label">Grosor de línea</label>
+                  <div class="input-group input-group-sm">
+                    <input type="number" class="form-control" id="propLineWidth" min="1" max="20">
+                    <span class="input-group-text">px</span>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="form-label">Estilo de línea</label>
+                  <div class="btn-group w-100" role="group">
+                    <input type="radio" class="btn-check" name="lineStyle" id="lineSolid" value="solid" checked>
+                    <label class="btn btn-outline-secondary btn-sm" for="lineSolid">Sólida</label>
+                    
+                    <input type="radio" class="btn-check" name="lineStyle" id="lineDashed" value="dashed">
+                    <label class="btn btn-outline-secondary btn-sm" for="lineDashed">Discontinua</label>
+                    
+                    <input type="radio" class="btn-check" name="lineStyle" id="lineDotted" value="dotted">
+                    <label class="btn btn-outline-secondary btn-sm" for="lineDotted">Punteada</label>
+                  </div>
+                </div>
+
+                <!-- Botón para cambiar orientación -->
+                <div class="mb-3">
+                  <button class="btn btn-sm btn-outline-secondary w-100" id="btnToggleLineOrientation">
+                    <i class="bi bi-arrow-left-right me-1"></i> Cambiar Orientación
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Propiedades específicas para rectángulos -->
+              <div id="rectProperties" style="display: none;">
+                <div class="mb-3">
+                  <label for="propFillColor" class="form-label">Color de relleno</label>
+                  <input type="color" class="form-control form-control-sm" id="propFillColor">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="propBorderColor" class="form-label">Color de borde</label>
+                  <input type="color" class="form-control form-control-sm" id="propBorderColor">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="propBorderWidth" class="form-label">Grosor de borde</label>
+                  <div class="input-group input-group-sm">
+                    <input type="number" class="form-control" id="propBorderWidth" min="0" max="10">
+                    <span class="input-group-text">px</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Propiedades específicas para imágenes -->
+              <div id="imageProperties" style="display: none;">
+                <div class="mb-3">
+                  <label for="propImageUpload" class="form-label">Cambiar imagen</label>
+                  <input type="file" class="form-control form-control-sm" id="propImageUpload" accept="image/*">
+                </div>
+                
+                <div class="mb-3 text-center">
+                  <button class="btn btn-sm btn-outline-secondary" id="btnCropImage">
+                    <i class="bi bi-crop me-1"></i> Recortar
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Botones para aplicar cambios -->
+              <div class="mt-3 d-grid">
+                <button class="btn btn-primary" id="btnApplyProperties">Aplicar Cambios</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white py-3 mt-auto border-top">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <span class="text-muted">Sistema de Credenciales &copy; 2025</span>
+        </div>
+        <div>
+          <span class="text-muted">Versión 1.0</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal de edición de texto -->
+  <div class="modal fade" id="textEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Texto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="modalPropText" class="form-label">Texto</label>
+            <input type="text" class="form-control" id="modalPropText">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btnSaveText" data-bs-dismiss="modal">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para seleccionar campo de datos -->
+  <div class="modal fade" id="placeholderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Seleccionar Campo de Datos</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="list-group">
+            <button type="button" class="list-group-item list-group-item-action" data-field="{{nombre}}">
+              <strong>Nombre</strong> - Nombre del usuario
+            </button>
+            <button type="button" class="list-group-item list-group-item-action" data-field="{{apellidos}}">
+              <strong>Apellidos</strong> - Apellidos del usuario
+            </button>
+            <button type="button" class="list-group-item list-group-item-action" data-field="{{numero_nomina}}">
+              <strong>Número de Nómina</strong> - Número de nómina del usuario
+            </button>
+            <button type="button" class="list-group-item list-group-item-action" data-field="{{numero_seguridad_social}}">
+              <strong>NSS</strong> - Número de seguridad social
+            </button>
+            <button type="button" class="list-group-item list-group-item-action" data-field="{{rfc}}">
+              <strong>RFC</strong> - RFC del usuario
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/utilidades/api.js"></script>
+  <script src="../js/utilidades/drag-drop.js"></script>
+  <script src="../js/plantillas/editor.js"></script>
+</body>
+</html>

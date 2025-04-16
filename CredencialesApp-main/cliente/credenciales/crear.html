@@ -1,0 +1,223 @@
+<!-- cliente/credenciales/crear.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Credencial - Sistema de Credenciales</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/animaciones.css">
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="bg-light">
+  <!-- Header común -->
+  <header class="header-app bg-primary text-white p-3 shadow">
+    <div class="container d-flex align-items-center">
+      <img src="../img/logo.png" alt="Logo" class="me-3" style="height:50px;">
+      <h1 class="h4 m-0 flex-grow-1">Sistema de Credenciales</h1>
+      <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person-circle me-1"></i> <span id="nombreUsuario">Usuario</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+          <li><button class="dropdown-item" id="btnLogout"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navegación -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="../dashboard.html"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="lista.html"><i class="bi bi-person-vcard me-1"></i> Credenciales</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#"><i class="bi bi-plus-circle me-1"></i> Nueva Credencial</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../plantillas/lista.html"><i class="bi bi-layout-text-window me-1"></i> Plantillas</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <main class="container py-4 fade-in">
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <h2 class="mb-0" id="formTitle"><i class="bi bi-plus-circle me-2"></i>Nueva Credencial</h2>
+          <a href="lista.html" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Volver a la Lista
+          </a>
+        </div>
+        <hr>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <form id="credencialForm">
+              <div class="row g-3">
+                <!-- Datos personales -->
+                <div class="col-md-6">
+                  <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="nombre" name="nombre" required>
+                  <div class="invalid-feedback">El nombre es obligatorio.</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="apellidos" class="form-label">Apellidos <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="apellidos" name="apellidos" required>
+                  <div class="invalid-feedback">Los apellidos son obligatorios.</div>
+                </div>
+                
+                <!-- Número de seguridad social -->
+                <div class="col-md-6">
+                  <label for="numero_seguridad_social" class="form-label">Número de Seguridad Social <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="numero_seguridad_social" name="numero_seguridad_social" required pattern="[0-9]{11}">
+                  <div class="invalid-feedback">El NSS debe tener 11 dígitos.</div>
+                </div>
+                
+                <!-- Número de nómina -->
+                <div class="col-md-6">
+                  <label for="numero_nomina" class="form-label">Número de Nómina <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="numero_nomina" name="numero_nomina" required>
+                  <div class="invalid-feedback">El número de nómina es obligatorio.</div>
+                </div>
+                
+                <!-- RFC -->
+                <div class="col-md-6">
+                  <label for="rfc" class="form-label">RFC <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="rfc" name="rfc" required minlength="12" maxlength="13">
+                  <div class="invalid-feedback">El RFC debe tener entre 12 y 13 caracteres.</div>
+                </div>
+                
+                <!-- Botones de acción -->
+                <div class="col-12 mt-4">
+                  <div class="d-flex justify-content-end gap-2">
+                    <button type="reset" class="btn btn-secondary">
+                      <i class="bi bi-arrow-counterclockwise me-1"></i> Reiniciar
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="btnSubmit">
+                      <i class="bi bi-save me-1"></i> Guardar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Panel de foto -->
+      <div class="col-md-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="bi bi-camera me-2"></i>Fotografía</h5>
+          </div>
+          <div class="card-body text-center">
+            <div class="mb-3">
+              <img id="previewFoto" src="../img/placeholder-user.png" alt="Foto de usuario" class="img-thumbnail" style="width: 150px; height: 180px; object-fit: cover;">
+            </div>
+            <div class="d-grid">
+              <input type="file" id="fotoUpload" accept="image/*" class="d-none">
+              <button type="button" class="btn btn-outline-primary" id="btnUploadFoto">
+                <i class="bi bi-upload me-1"></i> Subir Foto
+              </button>
+            </div>
+            
+            <hr>
+            
+            <div class="text-start">
+              <p class="text-muted small mb-1">Recomendaciones:</p>
+              <ul class="text-muted small">
+                <li>Formato: JPG o PNG</li>
+                <li>Dimensiones: 300x400 píxeles</li>
+                <li>Fondo claro o blanco</li>
+                <li>Rostro centrado y visible</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Acciones adicionales -->
+        <div class="card shadow-sm mt-3">
+          <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Acciones</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <button type="button" class="btn btn-outline-success" id="btnImprimir" disabled>
+                <i class="bi bi-printer me-1"></i> Imprimir Credencial
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white py-3 mt-auto border-top">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <span class="text-muted">Sistema de Credenciales &copy; 2025</span>
+        </div>
+        <div>
+          <span class="text-muted">Versión 1.0</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal de impresión -->
+  <div class="modal fade" id="printModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="bi bi-printer-fill me-2"></i>Imprimir Credencial</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="selectTemplatePrint" class="form-label">Seleccionar Plantilla</label>
+            <select class="form-select" id="selectTemplatePrint">
+              <option value="" selected disabled>Seleccione una plantilla</option>
+            </select>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-success" id="btnDirectPrint">
+              <i class="bi bi-printer me-1"></i> Imprimir Ahora
+            </button>
+            <button type="button" class="btn btn-primary" id="btnGeneratePDF">
+              <i class="bi bi-file-pdf me-1"></i> Generar PDF
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/utilidades/api.js"></script>
+  <script src="../js/credenciales/crear.js"></script>
+</body>
+</html>

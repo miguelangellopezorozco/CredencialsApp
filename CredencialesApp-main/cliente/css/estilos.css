@@ -1,0 +1,221 @@
+
+/* Estilos generales */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1;
+}
+
+/* Tarjetas */
+.hover-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Íconos de características */
+.feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+}
+
+/* Header */
+.header-app {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Form controls */
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Botones */
+.btn {
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Tablas */
+.table th {
+  font-weight: 600;
+  background-color: #f8f9fa;
+}
+
+/* Enlaces */
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Utilidades específicas */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Estilos para el editor de credenciales */
+.credential-container {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.credential-side {
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-radius: 4px;
+  position: relative;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.credential-front,
+.credential-back {
+  position: relative;
+  height: 300px;
+  border: 1px solid #ddd;
+}
+
+/* cliente/css/animaciones.css */
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-up {
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.logo-bounce:hover {
+  animation: bounce 0.5s ease-in-out infinite;
+}
+
+/* Transiciones */
+.page-transition {
+  transition: opacity 0.3s ease;
+}
+
+.page-transition.loading {
+  opacity: 0;
+}
+
+/* Efectos */
+.shadow-hover {
+  transition: box-shadow 0.3s ease;
+}
+
+.shadow-hover:hover {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Efectos para el editor */
+.element-selected {
+  box-shadow: 0 0 0 2px #0d6efd !important;
+  z-index: 100;
+}
+
+.element-dragging {
+  opacity: 0.8;
+  cursor: grabbing !important;
+}
+
+/* Efectos para drag & drop */
+.dropzone {
+  transition: background-color 0.3s ease;
+}
+
+.dropzone.dragover {
+  background-color: rgba(13, 110, 253, 0.1);
+  border: 2px dashed #0d6efd;
+}
+
+/* Animación de carga */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(13, 110, 253, 0.3);
+  border-radius: 50%;
+  border-top-color: #0d6efd;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Tooltip personalizado */
+.custom-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.custom-tooltip.visible {
+  opacity: 1;
+}
+
+/* Efectos para botones */
+.btn-pulse {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+  }
+}
