@@ -1,29 +1,34 @@
 // servidor/servidor.js
 require('dotenv').config();
-const app = require('./aplicacion');
-const db = require('./modelos/indice');
-const bcrypt = require('bcrypt');
+const app      = require('./aplicacion');
+const db       = require('./modelos/indice');
+const bcrypt   = require('bcrypt');
 const Operador = require('./modelos/Operador');
 
-const PORT = process.env.PORT || 3000;
+const PORT        = process.env.PORT || 3000;
+const ADMIN_ROLE  = 'admin';          // ← AJUSTE: rol como string
 
-// Función para crear un administrador por defecto si no existe
+// -----------------------------------------------------------------------------
+// Crea un usuario administrador por defecto si aún no existe
+// -----------------------------------------------------------------------------
 const crearAdminPorDefecto = async () => {
   try {
-    const adminCount = await Operador.count({ where: { rol: 'admin' } });
-    
+    // Buscamos cuántos admins hay con rol = 'admin'
+    const adminCount = await Operador.count({ where: { rol: ADMIN_ROLE } });
+
     if (adminCount === 0) {
-      console.log('Creando usuario administrador por defecto...');
-      
-      const saltRounds = 10;
+      console.log('Creando usuario administrador por defecto…');
+
+      const saltRounds     = 10;
       const hashedPassword = await bcrypt.hash('admin123', saltRounds);
-      
+
       await Operador.create({
-        usuario: 'admin',
+        usuario : 'admin',
         password: hashedPassword,
-        rol: 'admin'
+        rol     : ADMIN_ROLE          // ← se envía 'admin'
+        // created_at y updated_at los rellena Sequelize (timestamps: true)
       });
-      
+
       console.log('Usuario administrador creado: admin / admin123');
     }
   } catch (error) {
@@ -31,14 +36,16 @@ const crearAdminPorDefecto = async () => {
   }
 };
 
-// Iniciar el servidor
+// -----------------------------------------------------------------------------
+// Sincroniza la BD e inicia el servidor
+// -----------------------------------------------------------------------------
 db.sequelize.sync()
   .then(async () => {
     console.log('Base de datos sincronizada');
-    
-    // Crear admin por defecto
+
+    // Crea admin por defecto si hace falta
     await crearAdminPorDefecto();
-    
+
     app.listen(PORT, () => {
       console.log(`Servidor corriendo en http://localhost:${PORT}`);
     });

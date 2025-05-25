@@ -1,0 +1,73 @@
+# Dependencias
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Archivos de entorno y configuración
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+config/local.js
+
+# Archivos de logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos subidos por usuarios
+cliente/uploads/
+cliente/img/uploads/
+cliente/uploads/fotos/*
+cliente/uploads/logos/*
+cliente/uploads/pdfs/*
+!cliente/uploads/fotos/.gitkeep
+!cliente/uploads/logos/.gitkeep
+!cliente/uploads/pdfs/.gitkeep
+
+# Archivos temporales
+tmp/
+temp/
+.tmp
+.temp
+.cache/
+
+# Archivos de compilación
+dist/
+build/
+out/
+.next/
+
+# Archivos de cobertura
+coverage/
+.nyc_output/
+
+# Archivos de base de datos local
+*.sqlite
+*.sqlite3
+*.db
+
+# Archivos específicos de IDE y editores de código
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.sublime
+.project
+.classpath
+.settings/
+.directory
+Thumbs.db
+desktop.ini
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
