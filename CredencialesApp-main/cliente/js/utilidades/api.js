@@ -5,10 +5,9 @@
 class API {
     /**
      * Constructor de la clase
-     * @param {string} baseURL - URL base de la API
      */
-    constructor(baseURL = '/api') {
-      this.baseURL = baseURL;
+    constructor() {
+        this.baseURL = '/api';
     }
   
     /**
@@ -36,7 +35,8 @@ class API {
           method,
           headers,
           body,
-          credentials: 'same-origin' // Enviar cookies para sesiones
+          credentials: 'include', // Incluir cookies en todas las solicitudes
+          mode: 'cors' // Habilitar CORS
         });
   
         // Si la respuesta es 401 (no autorizado) y no es la ruta de login,
@@ -66,7 +66,7 @@ class API {
       }
     }
   
-    // Métodos específicos para cada tipo de petición
+    // Métodos HTTP
     async get(endpoint) {
       return this.request(endpoint);
     }
@@ -96,30 +96,9 @@ class API {
       return this.get('/auth/verificar');
     }
   
-    // Métodos específicos para operadores
-    async obtenerOperadores() {
-      return this.get('/operadores');
-    }
-  
-    async crearOperador(data) {
-      return this.post('/operadores', data);
-    }
-  
-    async actualizarOperador(id, data) {
-      return this.put(`/operadores/${id}`, data);
-    }
-  
-    async eliminarOperador(id) {
-      return this.delete(`/operadores/${id}`);
-    }
-  
-    // Métodos específicos para credenciales
+    // Métodos para credenciales
     async obtenerCredenciales() {
       return this.get('/credenciales');
-    }
-  
-    async buscarCredenciales(termino) {
-      return this.get(`/credenciales/buscar?termino=${encodeURIComponent(termino)}`);
     }
   
     async obtenerCredencial(id) {
@@ -127,18 +106,22 @@ class API {
     }
   
     async crearCredencial(data) {
-      return this.post('/credenciales', data, false); // false para FormData
+      return this.post('/credenciales', data, false);
     }
   
     async actualizarCredencial(id, data) {
-      return this.put(`/credenciales/${id}`, data, false); // false para FormData
+      return this.put(`/credenciales/${id}`, data, false);
     }
   
     async eliminarCredencial(id) {
       return this.delete(`/credenciales/${id}`);
     }
   
-    // Métodos específicos para plantillas
+    async buscarCredenciales(termino) {
+      return this.get(`/credenciales/buscar?q=${encodeURIComponent(termino)}`);
+    }
+  
+    // Métodos para plantillas
     async obtenerPlantillas() {
       return this.get('/plantillas');
     }
@@ -159,20 +142,51 @@ class API {
       return this.delete(`/plantillas/${id}`);
     }
   
-    async subirLogo(formData) {
-      return this.post('/plantillas/logo', formData, false);
+    // Métodos para PDF
+    async generarPDFCredencial(id, plantillaId) {
+      if (!id || !plantillaId) {
+        throw new Error('Se requieren ID de credencial y plantilla');
+      }
+      
+      try {
+        // Hacer la petición con fetch para mantener las credenciales
+        const response = await fetch(`${this.baseURL}/pdf/credencial/${id}/${plantillaId}`, {
+          method: 'GET',
+          credentials: 'include',
+          mode: 'cors'
+        });
+        
+        if (!response.ok) {
+          throw new Error('Error al generar PDF');
+        }
+        
+        // Obtener el blob del PDF
+        const blob = await response.blob();
+        
+        // Crear URL temporal para el blob
+        const url = window.URL.createObjectURL(blob);
+        
+        // Abrir en nueva ventana
+        window.open(url, '_blank');
+        
+        // Limpiar la URL después de un tiempo
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+        }, 100);
+        
+      } catch (error) {
+        console.error('Error al generar PDF:', error);
+        throw error;
+      }
     }
   
-    // Métodos específicos para PDFs
-    async generarPDFCredencial(credencialId, plantillaId) {
-      // Esta petición genera una descarga de archivo
-      window.open(`${this.baseURL}/pdf/credencial/${credencialId}/${plantillaId}`, '_blank');
+    async guardarPDFCredencial(id, plantillaId) {
+      if (!id || !plantillaId) {
+        throw new Error('Se requieren ID de credencial y plantilla');
+      }
+      return this.post(`/pdf/guardar-credencial/${id}/${plantillaId}`);
     }
+}
   
-    async guardarPDFCredencial(credencialId, plantillaId) {
-      return this.post(`/pdf/guardar-credencial/${credencialId}/${plantillaId}`);
-    }
-  }
-  
-  // Exportar una instancia global
-  const api = new API();
+// Crear instancia global
+const api = new API();

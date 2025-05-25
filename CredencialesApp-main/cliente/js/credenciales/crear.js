@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
   // Referencias a elementos del DOM
   const credencialForm = document.getElementById('credencialForm');
@@ -218,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Imprimir directamente
-  btnDirectPrint.addEventListener('click', () => {
+  btnDirectPrint.addEventListener('click', async () => {
     const templateId = selectTemplatePrint.value;
     
     if (!templateId) {
@@ -226,11 +225,30 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
-    // Imprimir con la plantilla seleccionada
-    api.generarPDFCredencial(credencialId, templateId);
+    if (!credencialId) {
+      alert('No hay una credencial seleccionada');
+      return;
+    }
     
-    // Cerrar modal
-    printModal.hide();
+    try {
+      // Cambiar estado del botón
+      btnDirectPrint.disabled = true;
+      btnDirectPrint.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Generando PDF...';
+      
+      // Generar PDF con la plantilla seleccionada
+      await api.generarPDFCredencial(credencialId, templateId);
+      
+      // Cerrar modal
+      printModal.hide();
+      
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      alert('Error al generar PDF. Intente de nuevo.');
+    } finally {
+      // Restaurar estado del botón
+      btnDirectPrint.disabled = false;
+      btnDirectPrint.innerHTML = '<i class="bi bi-printer me-1"></i> Imprimir Ahora';
+    }
   });
   
   // Generar PDF
@@ -239,6 +257,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (!templateId) {
       alert('Por favor, seleccione una plantilla');
+      return;
+    }
+    
+    if (!credencialId) {
+      alert('No hay una credencial seleccionada');
       return;
     }
     

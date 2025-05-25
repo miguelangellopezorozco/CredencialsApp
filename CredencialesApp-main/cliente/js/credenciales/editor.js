@@ -62,6 +62,15 @@ document.addEventListener('DOMContentLoaded', () => {
   let isEditing = false;
   let activeEditor = 'front'; // 'front' o 'back'
   
+  // after variable list add placeholder vars
+  const placeholderModal = new bootstrap.Modal(document.getElementById('placeholderModal'));
+  const placeholderButtons = document.querySelectorAll('[data-field]');
+  const propPlaceholderField = document.getElementById('propPlaceholderField');
+  const propPlaceholderSize = document.getElementById('propPlaceholderSize');
+  const propPlaceholderFamily = document.getElementById('propPlaceholderFamily');
+  const propPlaceholderColor = document.getElementById('propPlaceholderColor');
+  const btnAddPlaceholder = document.getElementById('btnAddPlaceholder');
+  
   // Inicializar arrastrar y soltar para ambos lados de la credencial
   initDragDrop();
   
@@ -144,6 +153,7 @@ function mejorarSeleccionLinea() {
       draggableSelector: '.draggable',
       onSelect: handleElementSelect,
       onDragEnd: handleElementMove,
+      onResize: handleElementResize,
       preventOutside: true
     });
     
@@ -152,6 +162,7 @@ function mejorarSeleccionLinea() {
       draggableSelector: '.draggable',
       onSelect: handleElementSelect,
       onDragEnd: handleElementMove,
+      onResize: handleElementResize,
       preventOutside: true
     });
     
@@ -394,8 +405,64 @@ function agregarElementoLinea() {
   
   // Manejar el movimiento de un elemento
   function handleElementMove(element) {
+    // Snap a 5px
+    const snap = 5;
+    let left = parseInt(element.style.left) || 0;
+    let top = parseInt(element.style.top) || 0;
+
+    left = Math.round(left / snap) * snap;
+    top = Math.round(top / snap) * snap;
+
+    element.style.left = `${left}px`;
+    element.style.top = `${top}px`;
+
     // Actualizar propiedades de posición
     actualizarPropsPos(element);
+  }
+  
+  // Manejar redimensionamiento para ajustar font-size e imágenes
+  function handleElementResize(element) {
+    // Ajustar imagen interna
+    if (element.getAttribute('data-type') === 'imagen') {
+      const img = element.querySelector('img');
+      if (img) {
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
+      }
+    }
+
+    // Ajustar tamaño de fuente en texto
+    if (element.getAttribute('data-type') === 'texto') {
+      const newHeight = element.offsetHeight;
+      const newFontSize = Math.max(8, Math.round(newHeight * 0.7));
+      element.style.fontSize = `${newFontSize}px`;
+      propFontSize.value = newFontSize;
+    }
+
+    // Ajustar grosor de línea
+    if (element.getAttribute('data-type') === 'linea') {
+      if (element.classList.contains('horizontal')) {
+        const thickness = element.offsetHeight;
+        element.style.borderTopWidth = `${thickness}px`;
+        propLineWidth.value = thickness;
+      } else {
+        const thickness = element.offsetWidth;
+        element.style.borderLeftWidth = `${thickness}px`;
+        propLineWidth.value = thickness;
+      }
+    }
+
+    // Actualizar propiedades panel
+    actualizarPropsPos(element);
+
+    // modify handleElementResize font-size placeholder
+    if (element.getAttribute('data-type') === 'placeholder') {
+      const h = element.offsetHeight;
+      const size = Math.max(8, Math.round(h*0.7));
+      element.style.fontSize = `${size}px`;
+      propPlaceholderSize.value = size;
+    }
   }
   
   // Eliminar el elemento seleccionado
@@ -490,6 +557,14 @@ function agregarElementoLinea() {
         document.getElementById('lineDashed').checked = estiloLinea === 'dashed';
         document.getElementById('lineDotted').checked = estiloLinea === 'dotted';
         break;
+
+      case 'placeholder':
+        placeholderProperties.style.display = 'block';
+        propPlaceholderField.value = element.textContent;
+        propPlaceholderSize.value = parseInt(element.style.fontSize);
+        propPlaceholderFamily.value = element.style.fontFamily;
+        propPlaceholderColor.value = rgbToHex(element.style.color);
+        break;
     }
   }
   
@@ -571,6 +646,13 @@ function agregarElementoLinea() {
           element.style.width = grosorLinea;
           element.style.height = `${propHeight.value}px`;
         }
+        break;
+
+      case 'placeholder':
+        element.textContent = propPlaceholderField.value;
+        element.style.fontSize = `${propPlaceholderSize.value}px`;
+        element.style.fontFamily = propPlaceholderFamily.value;
+        element.style.color = propPlaceholderColor.value;
         break;
     }
   }
@@ -1019,4 +1101,44 @@ function agregarElementoLinea() {
     };
     reader.readAsDataURL(file);
   });
+
+  // Inicializar tooltips para la nueva sidebar
+  const tooltipList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipList.forEach(t => new bootstrap.Tooltip(t));
+
+  // Delete key
+  document.addEventListener('keydown', (e) => {
+    if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      eliminarElementoSeleccionado();
+    }
+  });
+
+  // add agregarElementoPlaceholder and crearPlaceholder functions near others
+  function agregarElementoPlaceholder() {
+    placeholderModal.show();
+  }
+  function crearPlaceholder(field) {
+    const editor = activeEditor === 'front' ? frontEditor : backEditor;
+    const dragDrop = activeEditor === 'front' ? frontDragDrop : backDragDrop;
+
+    const element = document.createElement('div');
+    element.className = 'draggable element-text element-placeholder';
+    element.setAttribute('data-type', 'placeholder');
+    element.setAttribute('data-field', field);
+    element.style.fontFamily = 'Arial, sans-serif';
+    element.style.fontSize = '14px';
+    element.style.color = '#000000';
+    element.style.backgroundColor = 'rgba(173,216,230,0.2)';
+    element.style.border = '1px dashed #007bff';
+    element.style.padding = '2px 5px';
+    element.textContent = field;
+
+    dragDrop.addElement(element, 50, 50);
+    dragDrop.selectElement(element);
+  }
+
+  // event listeners
+  btnAddPlaceholder.addEventListener('click', agregarElementoPlaceholder);
+  placeholderButtons.forEach(b=>{b.addEventListener('click',()=>{crearPlaceholder(b.dataset.field); placeholderModal.hide();});});
 });

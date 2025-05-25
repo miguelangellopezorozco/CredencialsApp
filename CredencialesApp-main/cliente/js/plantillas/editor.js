@@ -149,6 +149,7 @@ function mejorarSeleccionLinea() {
       draggableSelector: '.draggable',
       onSelect: handleElementSelect,
       onDragEnd: handleElementMove,
+      onResize: handleElementResize,
       preventOutside: true
     });
     
@@ -157,6 +158,7 @@ function mejorarSeleccionLinea() {
       draggableSelector: '.draggable',
       onSelect: handleElementSelect,
       onDragEnd: handleElementMove,
+      onResize: handleElementResize,
       preventOutside: true
     });
     
@@ -501,7 +503,61 @@ function agregarElementoLinea() {
   
   // Manejar el movimiento de un elemento
   function handleElementMove(element) {
-    // Actualizar propiedades de posición
+    // Snap a 5px
+    const snap = 5;
+    let left = parseInt(element.style.left) || 0;
+    let top = parseInt(element.style.top) || 0;
+
+    left = Math.round(left / snap) * snap;
+    top = Math.round(top / snap) * snap;
+
+    element.style.left = `${left}px`;
+    element.style.top = `${top}px`;
+
+    // Actualizar panel de propiedades con nuevos valores
+    actualizarPropsPos(element);
+  }
+  
+  // Manejar la redimensión de un elemento
+  function handleElementResize(element) {
+    // Ajustar dimensiones para imágenes internas
+    if (element.getAttribute('data-type') === 'imagen') {
+      const img = element.querySelector('img');
+      if (img) {
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
+      }
+    }
+
+    // Ajustar font-size dinámicamente
+    if (element.getAttribute('data-type') === 'texto' || element.getAttribute('data-type') === 'placeholder') {
+      const newHeight = element.offsetHeight;
+      const newFontSize = Math.max(8, Math.round(newHeight * 0.7)); // 70% de la altura
+      element.style.fontSize = `${newFontSize}px`;
+
+      // Actualizar campo correspondiente en el panel
+      if (element.getAttribute('data-type') === 'texto') {
+        propFontSize.value = newFontSize;
+      } else {
+        propPlaceholderSize.value = newFontSize;
+      }
+    }
+
+    // Ajustar grosor de línea
+    if (element.getAttribute('data-type') === 'linea') {
+      if (element.classList.contains('horizontal')) {
+        const thickness = element.offsetHeight;
+        element.style.borderTopWidth = `${thickness}px`;
+        propLineWidth.value = thickness;
+      } else {
+        const thickness = element.offsetWidth;
+        element.style.borderLeftWidth = `${thickness}px`;
+        propLineWidth.value = thickness;
+      }
+    }
+
+    // Actualizar panel con nuevas dimensiones
     actualizarPropsPos(element);
   }
   
@@ -936,5 +992,37 @@ function agregarElementoLinea() {
         }
       };
       reader.readAsDataURL(file);
+    });
+
+    /* ======================
+     *  CUADRÍCULA DE FONDO
+     * =====================*/
+    const gridFront = document.createElement('div');
+    gridFront.className = 'grid-overlay';
+    frontEditor.appendChild(gridFront);
+
+    const gridBack = document.createElement('div');
+    gridBack.className = 'grid-overlay';
+    backEditor.appendChild(gridBack);
+
+    // Botón para mostrar/ocultar cuadrícula
+    const btnToggleGrid = document.getElementById('btnToggleGrid');
+    btnToggleGrid.addEventListener('click', () => {
+      gridFront.classList.toggle('visible');
+      gridBack.classList.toggle('visible');
+      btnToggleGrid.classList.toggle('active');
+    });
+
+    // Inicializar tooltips Bootstrap en la barra lateral
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(tt => new bootstrap.Tooltip(tt));
+
+    // Soporte para tecla Supr / Backspace para eliminar elemento
+    document.addEventListener('keydown', (e) => {
+      // Ignorar si estás escribiendo en un input o textarea
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        eliminarElementoSeleccionado();
+      }
     });
   });

@@ -16,25 +16,34 @@ const rutasPDF = require('./rutas/rutasPDF');
 const app = express();
 
 // Configuración de middlewares
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors({
+  origin: 'http://localhost:3000', // Ajusta esto a tu URL del cliente
+  credentials: true
+}));
+
+// Configuración de body-parser con límites aumentados
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+
+// Configuración de sesión
 app.use(sessionMiddleware);
+
+// Middleware para obtener el operador actual
 app.use(obtenerOperadorActual);
 
 // Servir archivos estáticos
-app.use(express.static(path.join(__dirname, '../cliente')));
+app.use(express.static(path.join(__dirname, '..', 'cliente')));
 
-// Rutas API
+// Rutas
 app.use('/api/auth', rutasAutenticacion);
 app.use('/api/operadores', rutasOperador);
 app.use('/api/credenciales', rutasCredencial);
 app.use('/api/plantillas', rutasPlantilla);
 app.use('/api/pdf', rutasPDF);
 
-// Ruta para todas las demás solicitudes (SPA)
+// Ruta para el cliente
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../cliente/index.html'));
+  res.sendFile(path.join(__dirname, '..', 'cliente', 'index.html'));
 });
 
 // Middleware para manejar errores

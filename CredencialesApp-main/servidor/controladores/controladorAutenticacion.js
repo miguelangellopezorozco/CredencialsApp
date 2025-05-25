@@ -3,31 +3,7 @@ const Operador = require('../modelos/Operador');
 const SesionOperador = require('../modelos/SesionOperador');
 const bcrypt = require('bcrypt');
 
-
-
 exports.iniciarSesion = async (req, res) => {
-  const { usuario, password } = req.body;
-  try {
-    const user = await Operador.findOne({ where: { usuario } });
-    if (!user) {
-      return res.status(401).json({ mensaje: 'Usuario no encontrado' });
-    }
-    
-    // TEMPORAL: Comparar contraseñas directamente sin bcrypt para desarrollo
-    if (password !== user.password) {
-      return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
-    }
-    
-    req.session.operadorId = user.id;
-    req.session.rol = user.rol;
-    return res.json({ mensaje: 'Inicio de sesión exitoso' });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ mensaje: 'Error en el servidor' });
-  }
-};
-
-/*exports.iniciarSesion = async (req, res) => {
   const { usuario, password } = req.body;
   try {
     const operador = await Operador.findOne({ where: { usuario } });
@@ -64,7 +40,7 @@ exports.iniciarSesion = async (req, res) => {
     console.error(error);
     return res.status(500).json({ mensaje: 'Error en el servidor' });
   }
-};*/
+};
 
 exports.cerrarSesion = async (req, res) => {
   try {

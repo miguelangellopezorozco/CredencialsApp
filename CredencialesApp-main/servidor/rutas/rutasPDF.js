@@ -14,6 +14,10 @@ router.get('/credencial/:id/:plantillaId', async (req, res) => {
   try {
     const { id, plantillaId } = req.params;
     
+    // Log para debugging
+    console.log(`Generando PDF para credencial ${id} con plantilla ${plantillaId}`);
+    console.log(`Usuario autenticado: ${req.session.operadorId}`);
+    
     // Obtener datos de la credencial
     const credencial = await Credencial.findByPk(id);
     if (!credencial) {
@@ -27,10 +31,10 @@ router.get('/credencial/:id/:plantillaId', async (req, res) => {
     }
     
     // Usar el generador de PDF
-    generarPDF(credencial.toJSON(), plantilla.layout_data, res, 'download');
+    await generarPDF(credencial.toJSON(), plantilla.layout_data, res, 'download');
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ mensaje: 'Error al generar el PDF' });
+    console.error('Error al generar PDF:', error);
+    return res.status(500).json({ mensaje: 'Error al generar el PDF', error: error.message });
   }
 });
 
@@ -52,15 +56,15 @@ router.post('/guardar-credencial/:id/:plantillaId', async (req, res) => {
     }
     
     // Generar y guardar el PDF
-    const pdfPath = generarPDF(credencial.toJSON(), plantilla.layout_data, null, 'stream');
+    const pdfPath = await generarPDF(credencial.toJSON(), plantilla.layout_data, null, 'stream');
     
     return res.status(200).json({ 
       mensaje: 'PDF generado exitosamente',
       pdfUrl: pdfPath
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ mensaje: 'Error al generar el PDF' });
+    console.error('Error al generar PDF:', error);
+    return res.status(500).json({ mensaje: 'Error al generar el PDF', error: error.message });
   }
 });
 
