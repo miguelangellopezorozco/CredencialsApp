@@ -23,17 +23,17 @@ yarn-error.log*
 
 # Archivos subidos por usuarios
 # Reglas para cliente/uploads/ y sus subdirectorios
-cliente/uploads/*
-!cliente/uploads/.gitkeep
-!cliente/uploads/fotos/
-!cliente/uploads/logos/
-!cliente/uploads/pdfs/
-cliente/uploads/fotos/*
-!cliente/uploads/fotos/.gitkeep
-cliente/uploads/logos/*
-!cliente/uploads/logos/.gitkeep
-cliente/uploads/pdfs/*
-!cliente/uploads/pdfs/.gitkeep
+CredencialesApp-main/cliente/uploads/*
+!CredencialesApp-main/cliente/uploads/.gitkeep
+!CredencialesApp-main/cliente/uploads/fotos/
+!CredencialesApp-main/cliente/uploads/logos/
+!CredencialesApp-main/cliente/uploads/pdfs/
+CredencialesApp-main/cliente/uploads/fotos/*
+!CredencialesApp-main/cliente/uploads/fotos/.gitkeep
+CredencialesApp-main/cliente/uploads/logos/*
+!CredencialesApp-main/cliente/uploads/logos/.gitkeep
+CredencialesApp-main/cliente/uploads/pdfs/*
+!CredencialesApp-main/cliente/uploads/pdfs/.gitkeep
 
 # Regla para cliente/img/uploads/ (se mantiene por si es una ruta distinta)
 cliente/img/uploads/
