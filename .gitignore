@@ -71,3 +71,6 @@ desktop.ini
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Regla para ignorar todo el contenido de la carpeta 'uploads' (incluyendo subcarpetas e imágenes/pdf) pero permitiendo que la carpeta exista en el repo si es necesario.
+/uploads/
