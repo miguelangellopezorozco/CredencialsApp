@@ -78,6 +78,26 @@ function esImagenValida(filePath) {
   }
 }
 
+const parseColor = (color) => {
+  if (!color) return null;
+  if (typeof color !== 'string') return color;
+  // Si ya está en formato hexadecimal
+  if (color.startsWith('#')) {
+    return color;
+  }
+  // Soporta formatos rgb() o rgba()
+  const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (rgbMatch) {
+    const r = parseInt(rgbMatch[1], 10);
+    const g = parseInt(rgbMatch[2], 10);
+    const b = parseInt(rgbMatch[3], 10);
+    const toHex = (v) => v.toString(16).padStart(2, '0');
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  }
+  // Si no coincide, devolver tal cual (puede ser un nombre estándar como 'black')
+  return color;
+};
+
 /**
  * Genera un PDF de credencial con frente y reverso
  * @param {Object} data Datos de la credencial
@@ -141,238 +161,248 @@ async function generarPDF(data, layoutData, res, modo = 'download') {
   // Función para renderizar elementos según su tipo y posición
   const renderizarElementos = async (elementos, data) => {
     console.log(`Renderizando ${elementos.length} elementos:`, elementos);
-    
-    for (let i = 0; i < elementos.length; i++) {
-      const elem = elementos[i];
-      console.log(`\n--- Elemento ${i + 1} ---`);
-      console.log('Tipo:', elem.type);
-      console.log('Posición PX:', { left: elem.left, top: elem.top, width: elem.width, height: elem.height });
-      
-      try {
-        const rawX = parseFloat(elem.left) || 0;
-        const rawY = parseFloat(elem.top) || 0;
-        const rawW = parseFloat(elem.width) || undefined;
-        const rawH = parseFloat(elem.height) || undefined;
 
-        const x = scaleX(rawX);
-        const y = scaleY(rawY);
-        const w = rawW !== undefined ? scaleX(rawW) : undefined;
-        const h = rawH !== undefined ? scaleY(rawH) : undefined;
+    // 1. Elementos de fondo
+    const fondo = elementos.filter(e => !['texto', 'placeholder'].includes(e.type));
+    // 2. Elementos de texto (primer plano)
+    const frenteTexto = elementos.filter(e => ['texto', 'placeholder'].includes(e.type));
+
+    const procesar = async (lista) => {
+      for (let i = 0; i < lista.length; i++) {
+        const elem = lista[i];
+        console.log(`\n--- Elemento ${i + 1} ---`);
+        console.log('Tipo:', elem.type);
+        console.log('Posición PX:', { left: elem.left, top: elem.top, width: elem.width, height: elem.height });
         
-        console.log(`Escalado a puntos x:${x}, y:${y}, w:${w}, h:${h}`);
+        try {
+          const rawX = parseFloat(elem.left) || 0;
+          const rawY = parseFloat(elem.top) || 0;
+          const rawW = parseFloat(elem.width) || undefined;
+          const rawH = parseFloat(elem.height) || undefined;
 
-        // Renderizar según el tipo de elemento
-        switch (elem.type) {
-          case 'texto':
-            console.log('Renderizando texto:', elem.content);
-            // Establecer fuente
-            if (elem.font) {
-              doc.font(mapearFuente(elem.font));
-            }
-            // Establecer tamaño de fuente
-            if (elem.fontSize) {
-              doc.fontSize(parseFloat(elem.fontSize) * SCALE_Y);
-            }
-            // Establecer color
-            if (elem.color) {
-              doc.fillColor(elem.color);
-            }
-            
-            // Renderizar texto con datos reales si contiene marcadores
-            let textoFinal = elem.content;
-            if (textoFinal && textoFinal.includes('{{')) {
-              const marcadores = textoFinal.match(/\{\{(.*?)\}\}/g);
-              if (marcadores) {
-                marcadores.forEach(marcador => {
-                  const campo = marcador.replace(/\{\{|\}\}/g, '').trim();
-                  if (data[campo] !== undefined) {
-                    textoFinal = textoFinal.replace(marcador, data[campo]);
-                  }
-                });
+          const x = scaleX(rawX);
+          const y = scaleY(rawY);
+          const w = rawW !== undefined ? scaleX(rawW) : undefined;
+          const h = rawH !== undefined ? scaleY(rawH) : undefined;
+          
+          console.log(`Escalado a puntos x:${x}, y:${y}, w:${w}, h:${h}`);
+
+          // Renderizar según el tipo de elemento
+          switch (elem.type) {
+            case 'texto':
+              console.log('Renderizando texto:', elem.content);
+              // Establecer fuente
+              const fuenteTexto = mapearFuente(elem.fontFamily || elem.font);
+              doc.font(fuenteTexto);
+              // Establecer tamaño de fuente
+              if (elem.fontSize) {
+                doc.fontSize(parseFloat(elem.fontSize) * SCALE_Y);
               }
-            }
-            
-            doc.text(textoFinal, x, y, {
-              width: w,
-              align: elem.align || 'left',
-              continued: false
-            });
-            break;
-            
-          case 'placeholder':
-            console.log('Renderizando placeholder:', elem.field);
-            
-            // Establecer fuente y tamaño
-            if (elem.fontSize) {
-              doc.fontSize(parseFloat(elem.fontSize) * SCALE_Y);
-            }
-            
-            // Usar fuente estándar PDF
-            const fuentePDF = mapearFuente(elem.fontFamily);
-            doc.font(fuentePDF);
-            
-            if (elem.color) {
-              doc.fillColor(elem.color);
-            }
-            
-            // Obtener el valor del campo
-            let valorCampo = '';
-            if (elem.field && elem.field.includes('{{')) {
-              const campo = elem.field.replace(/\{\{|\}\}/g, '').trim();
-              valorCampo = data[campo] || elem.field;
-            } else {
-              valorCampo = elem.field || '';
-            }
-            
-            console.log(`Campo: ${elem.field} -> Valor: ${valorCampo}`);
-            
-            doc.text(valorCampo, x, y, {
-              width: w,
-              align: elem.align || 'left',
-              continued: false
-            });
-            break;
-            
-          case 'imagen':
-            console.log('Renderizando imagen');
-            try {
-              // Comprobar si es una ruta de archivo o una imagen base64
-              if (elem.content && elem.content.startsWith('data:image')) {
-                // Es una imagen base64
-                console.log('Imagen base64 detectada');
-                const imgBuffer = await convertirImagenBase64(elem.content);
-                doc.image(imgBuffer, x, y, {
-                  width: w,
-                  height: h
-                });
-              } else {
-                // Es una ruta de archivo
-                const imgPath = path.join(__dirname, '..', '..', 'cliente', elem.content);
-                console.log('Buscando imagen en:', imgPath);
-                if (fs.existsSync(imgPath)) {
-                  // Verificar que el archivo sea una imagen válida
-                  if (esImagenValida(imgPath)) {
-                    doc.image(imgPath, x, y, {
-                      width: w,
-                      height: h
-                    });
-                  } else {
-                    console.warn(`La imagen ${imgPath} no es un formato válido`);
-                  }
-                } else {
-                  console.warn(`No se encontró la imagen: ${imgPath}`);
+              // Establecer color
+              if (elem.color) {
+                doc.fillColor(parseColor(elem.color));
+              }
+              
+              // Renderizar texto con datos reales si contiene marcadores
+              let textoFinal = elem.content;
+              if (textoFinal && textoFinal.includes('{{')) {
+                const marcadores = textoFinal.match(/\{\{(.*?)\}\}/g);
+                if (marcadores) {
+                  marcadores.forEach(marcador => {
+                    const campo = marcador.replace(/\{\{|\}\}/g, '').trim();
+                    if (data[campo] !== undefined) {
+                      textoFinal = textoFinal.replace(marcador, data[campo]);
+                    }
+                  });
                 }
               }
-            } catch (imgError) {
-              console.error('Error al procesar imagen:', imgError);
-              // Continuar con el siguiente elemento
-            }
-            break;
-            
-          case 'foto':
-            console.log('Renderizando foto del usuario');
-            try {
-              // Si es el elemento foto, usar el campo "foto" de los datos
-              if (data.foto) {
-                const fotoPath = path.join(__dirname, '..', '..', 'cliente', data.foto);
-                console.log('Buscando foto en:', fotoPath);
-                if (fs.existsSync(fotoPath)) {
-                  // Verificar que el archivo sea una imagen válida
-                  if (esImagenValida(fotoPath)) {
-                    doc.image(fotoPath, x, y, {
-                      width: w,
-                      height: h,
-                      fit: [w, h]
-                    });
+              
+              doc.text(textoFinal, x, y, {
+                width: w,
+                align: elem.align || 'left',
+                continued: false
+              });
+              break;
+              
+            case 'placeholder':
+              console.log('Renderizando placeholder:', elem.field);
+              
+              // Establecer fuente y tamaño
+              if (elem.fontSize) {
+                doc.fontSize(parseFloat(elem.fontSize) * SCALE_Y);
+              }
+              
+              // Usar fuente estándar PDF
+              const fuentePDF = mapearFuente(elem.fontFamily);
+              doc.font(fuentePDF);
+              
+              if (elem.color) {
+                doc.fillColor(parseColor(elem.color));
+              }
+              
+              // Obtener el valor del campo
+              let valorCampo = '';
+              if (elem.field && elem.field.includes('{{')) {
+                const campo = elem.field.replace(/\{\{|\}\}/g, '').trim();
+                valorCampo = data[campo] || elem.field;
+              } else {
+                valorCampo = elem.field || '';
+              }
+              
+              console.log(`Campo: ${elem.field} -> Valor: ${valorCampo}`);
+              
+              doc.text(valorCampo, x, y, {
+                width: w,
+                align: elem.align || 'left',
+                continued: false
+              });
+              break;
+              
+            case 'imagen':
+              console.log('Renderizando imagen');
+              try {
+                // Comprobar si es una ruta de archivo o una imagen base64
+                if (elem.content && elem.content.startsWith('data:image')) {
+                  // Es una imagen base64
+                  console.log('Imagen base64 detectada');
+                  const imgBuffer = await convertirImagenBase64(elem.content);
+                  doc.image(imgBuffer, x, y, {
+                    width: w,
+                    height: h
+                  });
+                } else {
+                  // Es una ruta de archivo
+                  const imgPath = path.join(__dirname, '..', '..', 'cliente', elem.content);
+                  console.log('Buscando imagen en:', imgPath);
+                  if (fs.existsSync(imgPath)) {
+                    // Verificar que el archivo sea una imagen válida
+                    if (esImagenValida(imgPath)) {
+                      doc.image(imgPath, x, y, {
+                        width: w,
+                        height: h
+                      });
+                    } else {
+                      console.warn(`La imagen ${imgPath} no es un formato válido`);
+                    }
                   } else {
-                    console.warn(`La foto ${fotoPath} no es un formato válido`);
+                    console.warn(`No se encontró la imagen: ${imgPath}`);
+                  }
+                }
+              } catch (imgError) {
+                console.error('Error al procesar imagen:', imgError);
+                // Continuar con el siguiente elemento
+              }
+              break;
+              
+            case 'foto':
+              console.log('Renderizando foto del usuario');
+              try {
+                // Si es el elemento foto, usar el campo "foto" de los datos
+                if (data.foto) {
+                  const fotoPath = path.join(__dirname, '..', '..', 'cliente', data.foto);
+                  console.log('Buscando foto en:', fotoPath);
+                  if (fs.existsSync(fotoPath)) {
+                    // Verificar que el archivo sea una imagen válida
+                    if (esImagenValida(fotoPath)) {
+                      doc.image(fotoPath, x, y, {
+                        width: w,
+                        height: h,
+                        fit: [w, h]
+                      });
+                    } else {
+                      console.warn(`La foto ${fotoPath} no es un formato válido`);
+                    }
+                  } else {
+                    console.warn(`No se encontró la foto: ${fotoPath}`);
                   }
                 } else {
-                  console.warn(`No se encontró la foto: ${fotoPath}`);
+                  console.warn('No hay foto en los datos del usuario');
                 }
-              } else {
-                console.warn('No hay foto en los datos del usuario');
+              } catch (fotoError) {
+                console.error('Error al procesar foto:', fotoError);
+                // Continuar con el siguiente elemento
               }
-            } catch (fotoError) {
-              console.error('Error al procesar foto:', fotoError);
-              // Continuar con el siguiente elemento
-            }
-            break;
-            
-          case 'rectangulo':
-            console.log('Renderizando rectángulo');
-            // Guardar estado actual
-            const currentStrokeColor = doc._strokeColor;
-            const currentFillColorRect = doc._fillColor;
-            
-            // Dibujar un rectángulo
-            if (elem.fillColor) {
-              doc.fillColor(elem.fillColor);
-            }
-            if (elem.strokeColor) {
-              doc.strokeColor(elem.strokeColor);
-            }
-            doc.rect(x, y, w || 0, h || 0);
-            
-            if (elem.fillColor && elem.strokeColor) {
-              doc.fillAndStroke();
-            } else if (elem.fillColor) {
-              doc.fill();
-            } else {
-              doc.stroke();
-            }
-            
-            // Restaurar estado anterior
-            if (currentStrokeColor) doc.strokeColor(currentStrokeColor);
-            if (currentFillColorRect) doc.fillColor(currentFillColorRect);
-            break;
-            
-          case 'linea':
-            console.log('Renderizando línea:', elem.orientation);
-            console.log('Color:', elem.lineColor, 'Grosor:', elem.lineWidth);
-            
-            // Guardar estado actual
-            const currentStrokeColorLine = doc._strokeColor;
-            const currentLineWidth = doc._lineWidth;
-            
-            // Establecer color y grosor de línea
-            if (elem.lineColor) {
-              doc.strokeColor(elem.lineColor);
-            }
-            if (elem.lineWidth) {
-              doc.lineWidth(Math.max(0.5, parseFloat(elem.lineWidth) * SCALE_Y) || 1);
-            }
-            
-            if (elem.orientation === 'vertical') {
-              // Línea vertical
-              const altura = h || 100;
-              doc.moveTo(x, y).lineTo(x, y + altura).stroke();
-            } else {
-              // Línea horizontal (por defecto)
-              const ancho = w || 100;
-              doc.moveTo(x, y).lineTo(x + ancho, y).stroke();
-            }
-            
-            // Restaurar estado anterior
-            if (currentStrokeColorLine) doc.strokeColor(currentStrokeColorLine);
-            if (currentLineWidth) doc.lineWidth(currentLineWidth);
-            break;
-            
-          case 'qr':
-            console.log('Renderizando código QR (no implementado)');
-            // Si se implementa código QR, se haría aquí
-            break;
-            
-          default:
-            console.warn('Tipo de elemento no reconocido:', elem.type);
-            break;
+              break;
+              
+            case 'rectangulo':
+              console.log('Renderizando rectángulo');
+              // Guardar estado actual
+              const currentStrokeColor = doc._strokeColor;
+              const currentFillColorRect = doc._fillColor;
+              
+              // Dibujar un rectángulo
+              if (elem.fillColor) {
+                doc.fillColor(parseColor(elem.fillColor));
+              }
+              if (elem.strokeColor) {
+                doc.strokeColor(parseColor(elem.strokeColor));
+              }
+              doc.rect(x, y, w || 0, h || 0);
+              
+              if (elem.fillColor && elem.strokeColor) {
+                doc.fillAndStroke();
+              } else if (elem.fillColor) {
+                doc.fill();
+              } else {
+                doc.stroke();
+              }
+              
+              // Restaurar estado anterior
+              if (currentStrokeColor) doc.strokeColor(currentStrokeColor);
+              if (currentFillColorRect) doc.fillColor(currentFillColorRect);
+              break;
+              
+            case 'linea':
+              console.log('Renderizando línea:', elem.orientation);
+              console.log('Color:', elem.lineColor, 'Grosor:', elem.lineWidth);
+              
+              // Guardar estado actual
+              const currentStrokeColorLine = doc._strokeColor;
+              const currentLineWidth = doc._lineWidth;
+              
+              // Establecer color y grosor de línea
+              if (elem.lineColor) {
+                doc.strokeColor(parseColor(elem.lineColor));
+              }
+              if (elem.lineWidth) {
+                doc.lineWidth(Math.max(0.5, parseFloat(elem.lineWidth) * SCALE_Y) || 1);
+              }
+              
+              if (elem.orientation === 'vertical') {
+                // Línea vertical
+                const altura = h || 100;
+                doc.moveTo(x, y).lineTo(x, y + altura).stroke();
+              } else {
+                // Línea horizontal (por defecto)
+                const ancho = w || 100;
+                doc.moveTo(x, y).lineTo(x + ancho, y).stroke();
+              }
+              
+              // Restaurar estado anterior
+              if (currentStrokeColorLine) doc.strokeColor(currentStrokeColorLine);
+              if (currentLineWidth) doc.lineWidth(currentLineWidth);
+              break;
+              
+            case 'qr':
+              console.log('Renderizando código QR (no implementado)');
+              // Si se implementa código QR, se haría aquí
+              break;
+              
+            default:
+              console.warn('Tipo de elemento no reconocido:', elem.type);
+              break;
+          }
+          
+          console.log(`Elemento ${i + 1} renderizado exitosamente`);
+        } catch (error) {
+          console.error(`Error al renderizar elemento ${i + 1}:`, error);
         }
-        
-        console.log(`Elemento ${i + 1} renderizado exitosamente`);
-      } catch (error) {
-        console.error(`Error al renderizar elemento ${i + 1}:`, error);
       }
-    }
+    };
+
+    // Dibujar primero fondo y luego texto
+    await procesar(fondo);
+    await procesar(frenteTexto);
   };
   
   // Primera página - Frente de la credencial
