@@ -22,14 +22,21 @@ yarn-debug.log*
 yarn-error.log*
 
 # Archivos subidos por usuarios
-cliente/uploads/
-cliente/img/uploads/
+# Reglas para cliente/uploads/ y sus subdirectorios
+cliente/uploads/*
+!cliente/uploads/.gitkeep
+!cliente/uploads/fotos/
+!cliente/uploads/logos/
+!cliente/uploads/pdfs/
 cliente/uploads/fotos/*
-cliente/uploads/logos/*
-cliente/uploads/pdfs/*
 !cliente/uploads/fotos/.gitkeep
+cliente/uploads/logos/*
 !cliente/uploads/logos/.gitkeep
+cliente/uploads/pdfs/*
 !cliente/uploads/pdfs/.gitkeep
+
+# Regla para cliente/img/uploads/ (se mantiene por si es una ruta distinta)
+cliente/img/uploads/
 
 # Archivos temporales
 tmp/
@@ -71,6 +78,3 @@ desktop.ini
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# Regla para ignorar todo el contenido de la carpeta 'uploads' (incluyendo subcarpetas e imágenes/pdf) pero permitiendo que la carpeta exista en el repo si es necesario.
-/uploads/
