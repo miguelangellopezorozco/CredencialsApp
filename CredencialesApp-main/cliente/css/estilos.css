@@ -10,6 +10,12 @@ main {
   flex: 1;
 }
 
+.prevent-select {
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+}
+
 /* Tarjetas */
 .hover-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -127,6 +133,30 @@ a:hover {
   50% { transform: translateY(-5px); }
 }
 
+/* Texto de titulo de pagina */
+h1.tit {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.74); /* Coloreo Borde */
+  color: rgb(255, 255, 255); /* Coloreo Relleno */
+  width: 72%;
+  text-align: center;
+  font-size: 30px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Centrado del DIV */
+div.cent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Fondo de Barra de Navegacion */
+.EncaGen {
+    background-color: rgb(13,21,40);
+}
+
+/* Animacion del Logo de Android */
 .logo-bounce:hover {
   animation: bounce 0.5s ease-in-out infinite;
 }

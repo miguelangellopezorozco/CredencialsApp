@@ -1,64 +1,122 @@
-<!-- cliente/credenciales/editor.html -->
-<!DOCTYPE html>
+<!-- Pagina Imprimir Credencial -->
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editor de Credencial - Sistema de Credenciales</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="../css/animaciones.css">
-  <link rel="stylesheet" href="../css/estilos.css">
-  <link rel="stylesheet" href="../css/editor.css">
-</head>
-<body class="bg-light">
-  <!-- Header común -->
-  <header class="header-app bg-primary text-white p-3 shadow">
-    <div class="container d-flex align-items-center">
-      <img src="../img/logo.png" alt="Logo" class="me-3" style="height:50px;">
-      <h1 class="h4 m-0 flex-grow-1">Sistema de Credenciales</h1>
-      <div class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-person-circle me-1"></i> <span id="nombreUsuario">Usuario</span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-          <li><button class="dropdown-item" id="btnLogout"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button></li>
-        </ul>
-      </div>
-    </div>
-  </header>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Navegación -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-    <div class="container">
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarMain">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link" href="../dashboard.html"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="lista.html"><i class="bi bi-person-vcard me-1"></i> Credenciales</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="#"><i class="bi bi-pencil-square me-1"></i> Editor</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="../plantillas/lista.html"><i class="bi bi-layout-text-window me-1"></i> Plantillas</a>
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+
+    <!--FontAwesome CDN-->
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+      integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu"
+      crossorigin="anonymous"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!--Custome CSS-->
+    <link rel="stylesheet" href="../css/animaciones.css" />
+    <link rel="stylesheet" href="../css/estilos.css" />
+        <link rel="stylesheet" href="../css/editor.css" />
+
+    <!--Title-->
+    <title>Imprimir Credencial</title>
+
+    <!--Icon-->
+    <link rel="icon" type="image/x-icon" href="/Icons/LogoIcon.ico" />
+  </head>
+  <body class="bg-light prevent-select">
+    <!------------------------------- Encabezado ------------------------------------>
+    <nav class="static navbar navbar-expand-lg EncaGen">
+      <a href="/dashboard.html"
+        ><img
+          src="/img/VoltavaLogo0.png"
+          width="250"
+          height="50"
+          class="logo-bounce"
+      /></a>
+      <h1 class="tit">Sistema de Credenciales</h1>
+      <div class="dropdown">
+        <button
+          class="btn btn-success dropdown-toggle"
+          type="button"
+          id="userDropdown"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <i class="bi bi-person-circle me-1"></i>
+          <span id="nombreUsuario">Usuario</span>
+        </button>
+        <ul
+          class="dropdown-menu dropdown-menu-end"
+          aria-labelledby="userDropdown"
+        >
+          <li>
+            <button class="dropdown-item" id="btnLogout">
+              <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+            </button>
           </li>
         </ul>
       </div>
-    </div>
-  </nav>
+    </nav>
+
+    <!------------------------------- Barra de Navegacion ------------------------------------>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+      <div class="container">
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarMain"
+          aria-controls="navbarMain"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMain">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="lista.html"
+                ><i class="bi bi-person me-1"></i>Personal</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="../plantillas/lista.html"
+                ><i class="bi bi-person-vcard me-1"></i>Credenciales</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="editor.html"
+                ><i class="bi bi-printer me-1"></i>Impresion</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
 
   <!-- Contenido principal -->
   <main class="container py-4 fade-in">
     <div class="row mb-4">
       <div class="col-12">
         <div class="d-flex justify-content-between align-items-center">
-          <h2 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Editor de Credencial</h2>
+          <h2 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Impresion de Credenciales</h2>
           <div class="btn-group">
             <button class="btn btn-outline-primary" id="btnSave"><i class="bi bi-save me-1"></i> Guardar</button>
             <button class="btn btn-outline-success" id="btnPrint"><i class="bi bi-printer me-1"></i> Imprimir</button>
@@ -74,20 +132,20 @@
       <div class="col-md-6">
         <div class="card shadow-sm">
           <div class="card-header bg-light">
-            <h5 class="mb-0"><i class="bi bi-person me-2"></i>Seleccionar Usuario</h5>
+            <h5 class="mb-0"><i class="bi bi-person me-2"></i>Seleccionar Personal</h5>
           </div>
           <div class="card-body">
             <div class="mb-3">
-              <label for="searchUser" class="form-label">Buscar Usuario</label>
+              <label for="searchUser" class="form-label">Buscar Personal</label>
               <div class="input-group">
                 <input type="text" class="form-control" id="searchUser" placeholder="Buscar por nombre, número de nómina, NSS o RFC">
                 <button class="btn btn-primary" id="btnSearch"><i class="bi bi-search"></i></button>
               </div>
             </div>
             <div class="mb-3">
-              <label for="selectUser" class="form-label">Usuario Seleccionado</label>
+              <label for="selectUser" class="form-label">Personal Seleccionado</label>
               <select class="form-select" id="selectUser">
-                <option value="" selected disabled>Seleccione un usuario</option>
+                <option value="" selected disabled>Seleccione el personal</option>
               </select>
             </div>
           </div>
@@ -96,17 +154,17 @@
       <div class="col-md-6">
         <div class="card shadow-sm">
           <div class="card-header bg-light">
-            <h5 class="mb-0"><i class="bi bi-layout-text-window me-2"></i>Seleccionar Plantilla</h5>
+            <h5 class="mb-0"><i class="bi bi-layout-text-window me-2"></i>Seleccionar Credencial</h5>
           </div>
           <div class="card-body">
             <div class="mb-3">
-              <label for="selectTemplate" class="form-label">Plantilla</label>
+              <label for="selectTemplate" class="form-label">Credencial</label>
               <select class="form-select" id="selectTemplate">
-                <option value="" selected disabled>Seleccione una plantilla</option>
+                <option value="" selected disabled>Seleccione una credencial</option>
               </select>
             </div>
             <div class="mb-3">
-              <button class="btn btn-outline-primary w-100" id="btnApplyTemplate"><i class="bi bi-brush me-1"></i> Aplicar Plantilla</button>
+              <button class="btn btn-outline-primary w-100" id="btnApplyTemplate"><i class="bi bi-brush me-1"></i> Aplicar Credencial</button>
             </div>
           </div>
         </div>
@@ -402,7 +460,7 @@
           <span class="text-muted">Sistema de Credenciales &copy; 2025</span>
         </div>
         <div>
-          <span class="text-muted">Versión 1.0</span>
+          <span class="text-muted">Versión 1.1</span>
         </div>
       </div>
     </div>
@@ -482,7 +540,9 @@
     </div>
   </div>
 
+  <!-- JavaScript and Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
   <script src="../js/utilidades/api.js"></script>
   <script src="../js/utilidades/drag-drop.js"></script>
   <script src="../js/credenciales/editor.js"></script>

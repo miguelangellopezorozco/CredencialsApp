@@ -1,11 +1,12 @@
 // servidor/utilidades/generadorPDF.js
-const PDFDocument = require('pdfkit');
-const fs = require('fs');
-const path = require('path');
-const sharp = require('sharp');
+const PDFDocument = require("pdfkit");
+const fs = require("fs");
+const path = require("path");
+const sharp = require("sharp");
+const bwipjs = require("bwip-js");
 
-const DOC_WIDTH = 243;   // puntos
-const DOC_HEIGHT = 153;  // puntos
+const DOC_WIDTH = 243; // puntos
+const DOC_HEIGHT = 153; // puntos
 const DESIGN_WIDTH = 480; // px del editor
 const DESIGN_HEIGHT = 300; // px del editor
 
@@ -22,25 +23,25 @@ const SCALE_Y = DOC_HEIGHT / DESIGN_HEIGHT;
 async function convertirImagenBase64(base64Data) {
   try {
     // Extraer el tipo de imagen y los datos
-    const matches = base64Data.match(/^data:image\/([A-Za-z-+\/]+);base64,(.+)$/);
+    const matches = base64Data.match(
+      /^data:image\/([A-Za-z-+\/]+);base64,(.+)$/,
+    );
     if (!matches || matches.length !== 3) {
-      throw new Error('Formato de imagen base64 inválido');
+      throw new Error("Formato de imagen base64 inválido");
     }
 
     const imageType = matches[1];
-    const imageBuffer = Buffer.from(matches[2], 'base64');
+    const imageBuffer = Buffer.from(matches[2], "base64");
 
     // Si es WebP, convertir a PNG
-    if (imageType === 'webp') {
-      return await sharp(imageBuffer)
-        .png()
-        .toBuffer();
+    if (imageType === "webp") {
+      return await sharp(imageBuffer).png().toBuffer();
     }
 
     // Para otros formatos compatibles, devolver el buffer original
     return imageBuffer;
   } catch (error) {
-    console.error('Error al convertir imagen:', error);
+    console.error("Error al convertir imagen:", error);
     throw error;
   }
 }
@@ -55,34 +56,44 @@ function esImagenValida(filePath) {
     const buffer = fs.readFileSync(filePath);
     // Verificar los primeros bytes para identificar el formato
     const header = buffer.slice(0, 4);
-    
+
     // PNG: 89 50 4E 47
-    if (header[0] === 0x89 && header[1] === 0x50 && header[2] === 0x4E && header[3] === 0x47) {
+    if (
+      header[0] === 0x89 &&
+      header[1] === 0x50 &&
+      header[2] === 0x4e &&
+      header[3] === 0x47
+    ) {
       return true;
     }
-    
+
     // JPEG: FF D8 FF
-    if (header[0] === 0xFF && header[1] === 0xD8 && header[2] === 0xFF) {
+    if (header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff) {
       return true;
     }
-    
+
     // GIF: 47 49 46 38
-    if (header[0] === 0x47 && header[1] === 0x49 && header[2] === 0x46 && header[3] === 0x38) {
+    if (
+      header[0] === 0x47 &&
+      header[1] === 0x49 &&
+      header[2] === 0x46 &&
+      header[3] === 0x38
+    ) {
       return true;
     }
-    
+
     return false;
   } catch (error) {
-    console.error('Error al verificar imagen:', error);
+    console.error("Error al verificar imagen:", error);
     return false;
   }
 }
 
 const parseColor = (color) => {
   if (!color) return null;
-  if (typeof color !== 'string') return color;
+  if (typeof color !== "string") return color;
   // Si ya está en formato hexadecimal
-  if (color.startsWith('#')) {
+  if (color.startsWith("#")) {
     return color;
   }
   // Soporta formatos rgb() o rgba()
@@ -91,7 +102,7 @@ const parseColor = (color) => {
     const r = parseInt(rgbMatch[1], 10);
     const g = parseInt(rgbMatch[2], 10);
     const b = parseInt(rgbMatch[3], 10);
-    const toHex = (v) => v.toString(16).padStart(2, '0');
+    const toHex = (v) => v.toString(16).padStart(2, "0");
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   }
   // Si no coincide, devolver tal cual (puede ser un nombre estándar como 'black')
@@ -105,11 +116,11 @@ const parseColor = (color) => {
  * @param {Object} res Objeto de respuesta Express
  * @param {String} modo 'download' o 'stream'
  */
-async function generarPDF(data, layoutData, res, modo = 'download') {
-  console.log('=== GENERANDO PDF ===');
-  console.log('Datos de credencial:', data);
-  console.log('Layout data:', JSON.stringify(layoutData, null, 2));
-  
+async function generarPDF(data, layoutData, res, modo = "download") {
+  console.log("=== GENERANDO PDF ===");
+  console.log("Datos de credencial:", data);
+  console.log("Layout data:", JSON.stringify(layoutData, null, 2));
+
   // Crear nuevo documento PDF
   const doc = new PDFDocument({
     size: [243, 153], // Tamaño tipo tarjeta de crédito en puntos (85.6mm x 53.98mm)
@@ -117,20 +128,23 @@ async function generarPDF(data, layoutData, res, modo = 'download') {
     autoFirstPage: false, // Importante: no crear la primera página automáticamente
     info: {
       Title: `Credencial - ${data.nombre} ${data.apellidos}`,
-      Author: 'Sistema de Credenciales'
-    }
+      Author: "Sistema de Credenciales",
+    },
   });
 
   // Configurar respuesta HTTP
-  if (modo === 'download') {
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=credencial_${data.numero_nomina}.pdf`);
+  if (modo === "download") {
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=credencial_${data.numero_nomina}.pdf`,
+    );
     doc.pipe(res);
   } else {
     // Si se quiere guardar en archivo
-    const uploadsDir = path.join(__dirname, '..', '..', 'cliente', 'uploads');
-    const pdfsDir = path.join(uploadsDir, 'pdfs');
-    
+    const uploadsDir = path.join(__dirname, "..", "..", "cliente", "uploads");
+    const pdfsDir = path.join(uploadsDir, "pdfs");
+
     // Asegurar que los directorios existan
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir, { recursive: true });
@@ -138,24 +152,28 @@ async function generarPDF(data, layoutData, res, modo = 'download') {
     if (!fs.existsSync(pdfsDir)) {
       fs.mkdirSync(pdfsDir, { recursive: true });
     }
-    
+
     const filePath = path.join(pdfsDir, `credencial_${data.numero_nomina}.pdf`);
     doc.pipe(fs.createWriteStream(filePath));
   }
 
   // Función para mapear fuentes web a fuentes PDF estándar
   const mapearFuente = (fontFamily) => {
-    if (!fontFamily) return 'Helvetica';
-    
+    if (!fontFamily) return "Helvetica";
+
     const font = fontFamily.toLowerCase();
-    if (font.includes('arial') || font.includes('helvetica') || font.includes('sans-serif')) {
-      return 'Helvetica';
-    } else if (font.includes('times') || font.includes('serif')) {
-      return 'Times-Roman';
-    } else if (font.includes('courier') || font.includes('monospace')) {
-      return 'Courier';
+    if (
+      font.includes("arial") ||
+      font.includes("helvetica") ||
+      font.includes("sans-serif")
+    ) {
+      return "Helvetica";
+    } else if (font.includes("times") || font.includes("serif")) {
+      return "Times-Roman";
+    } else if (font.includes("courier") || font.includes("monospace")) {
+      return "Courier";
     }
-    return 'Helvetica'; // Fuente por defecto
+    return "Helvetica"; // Fuente por defecto
   };
 
   // Función para renderizar elementos según su tipo y posición
@@ -163,17 +181,26 @@ async function generarPDF(data, layoutData, res, modo = 'download') {
     console.log(`Renderizando ${elementos.length} elementos:`, elementos);
 
     // 1. Elementos de fondo
-    const fondo = elementos.filter(e => !['texto', 'placeholder'].includes(e.type));
+    const fondo = elementos.filter(
+      (e) => !["texto", "placeholder"].includes(e.type),
+    );
     // 2. Elementos de texto (primer plano)
-    const frenteTexto = elementos.filter(e => ['texto', 'placeholder'].includes(e.type));
+    const frenteTexto = elementos.filter((e) =>
+      ["texto", "placeholder"].includes(e.type),
+    );
 
     const procesar = async (lista) => {
       for (let i = 0; i < lista.length; i++) {
         const elem = lista[i];
         console.log(`\n--- Elemento ${i + 1} ---`);
-        console.log('Tipo:', elem.type);
-        console.log('Posición PX:', { left: elem.left, top: elem.top, width: elem.width, height: elem.height });
-        
+        console.log("Tipo:", elem.type);
+        console.log("Posición PX:", {
+          left: elem.left,
+          top: elem.top,
+          width: elem.width,
+          height: elem.height,
+        });
+
         try {
           const rawX = parseFloat(elem.left) || 0;
           const rawY = parseFloat(elem.top) || 0;
@@ -184,13 +211,13 @@ async function generarPDF(data, layoutData, res, modo = 'download') {
           const y = scaleY(rawY);
           const w = rawW !== undefined ? scaleX(rawW) : undefined;
           const h = rawH !== undefined ? scaleY(rawH) : undefined;
-          
+
           console.log(`Escalado a puntos x:${x}, y:${y}, w:${w}, h:${h}`);
 
           // Renderizar según el tipo de elemento
           switch (elem.type) {
-            case 'texto':
-              console.log('Renderizando texto:', elem.content);
+            case "texto":
+              console.log("Renderizando texto:", elem.content);
               // Establecer fuente
               const fuenteTexto = mapearFuente(elem.fontFamily || elem.font);
               doc.font(fuenteTexto);
@@ -202,134 +229,201 @@ async function generarPDF(data, layoutData, res, modo = 'download') {
               if (elem.color) {
                 doc.fillColor(parseColor(elem.color));
               }
-              
+
               // Renderizar texto con datos reales si contiene marcadores
               let textoFinal = elem.content;
-              if (textoFinal && textoFinal.includes('{{')) {
+              if (textoFinal && textoFinal.includes("{{")) {
                 const marcadores = textoFinal.match(/\{\{(.*?)\}\}/g);
                 if (marcadores) {
-                  marcadores.forEach(marcador => {
-                    const campo = marcador.replace(/\{\{|\}\}/g, '').trim();
+                  marcadores.forEach((marcador) => {
+                    const campo = marcador.replace(/\{\{|\}\}/g, "").trim();
                     if (data[campo] !== undefined) {
                       textoFinal = textoFinal.replace(marcador, data[campo]);
                     }
                   });
                 }
               }
-              
+
               doc.text(textoFinal, x, y, {
                 width: w,
-                align: elem.align || 'left',
-                continued: false
+                align: elem.align || "left",
+                continued: false,
               });
               break;
-              
-            case 'placeholder':
-              console.log('Renderizando placeholder:', elem.field);
-              
-              // Establecer fuente y tamaño
-              if (elem.fontSize) {
-                doc.fontSize(parseFloat(elem.fontSize) * SCALE_Y);
+
+            case "placeholder":
+              console.log("Renderizando placeholder:", elem.field);
+
+              let valorCampo = "";
+              let nombreCampo = "";
+              console.log("DATA COMPLETA:", data);
+              console.log("nombreCampo detectado:", nombreCampo);
+
+              if (elem.field && elem.field.includes("{{")) {
+                nombreCampo = elem.field.replace(/\{\{|\}\}/g, "").trim();
+                valorCampo = data[nombreCampo] || "";
               }
-              
-              // Usar fuente estándar PDF
-              const fuentePDF = mapearFuente(elem.fontFamily);
-              doc.font(fuentePDF);
-              
-              if (elem.color) {
-                doc.fillColor(parseColor(elem.color));
-              }
-              
-              // Obtener el valor del campo
-              let valorCampo = '';
-              if (elem.field && elem.field.includes('{{')) {
-                const campo = elem.field.replace(/\{\{|\}\}/g, '').trim();
-                valorCampo = data[campo] || elem.field;
+
+              console.log(`Campo: ${nombreCampo} -> Valor: ${valorCampo}`);
+
+              // 🔥 SI EL CAMPO ES FOTO → RENDERIZAR COMO IMAGEN
+              if (nombreCampo === "foto" && valorCampo) {
+                try {
+                  const fotoPath = path.join(
+                    __dirname,
+                    "..",
+                    "..",
+                    "cliente",
+                    valorCampo,
+                  );
+
+                  if (fs.existsSync(fotoPath) && esImagenValida(fotoPath)) {
+                    doc.image(fotoPath, x, y, {
+                      width: w,
+                      height: h,
+                      fit: [w, h],
+                    });
+                  } else {
+                    console.warn(
+                      "No se encontró la foto o no es válida:",
+                      fotoPath,
+                    );
+                  }
+                } catch (error) {
+                  console.error("Error renderizando foto:", error);
+                }
               } else {
-                valorCampo = elem.field || '';
+                // 🔥 SI LA FUENTE ES BARCODE → GENERAR CODE39 REAL
+                if (
+                  elem.fontFamily &&
+                  elem.fontFamily.toLowerCase().includes("barcode")
+                ) {
+                  try {
+                    const png = await bwipjs.toBuffer({
+                      bcid: "code39",
+                      text: valorCampo,
+                      scale: 2,
+                      height: 10,
+                      includetext: false,
+                    });
+
+                    doc.image(png, x, y, {
+                      width: w,
+                      height: h,
+                    });
+                  } catch (err) {
+                    console.error("Error generando barcode:", err);
+                  }
+                } else {
+                  // 🔵 TEXTO NORMAL
+                  if (elem.fontSize) {
+                    doc.fontSize(parseFloat(elem.fontSize) * SCALE_Y);
+                  }
+
+                  const fuentePDF = mapearFuente(elem.fontFamily);
+                  doc.font(fuentePDF);
+
+                  if (elem.color) {
+                    doc.fillColor(parseColor(elem.color));
+                  }
+
+                  doc.text(valorCampo, x, y, {
+                    width: w,
+                    align: elem.align || "left",
+                  });
+                }
               }
-              
-              console.log(`Campo: ${elem.field} -> Valor: ${valorCampo}`);
-              
-              doc.text(valorCampo, x, y, {
-                width: w,
-                align: elem.align || 'left',
-                continued: false
-              });
+
               break;
-              
-            case 'imagen':
-              console.log('Renderizando imagen');
+
+            case "imagen":
+              console.log("Renderizando imagen");
               try {
                 // Comprobar si es una ruta de archivo o una imagen base64
-                if (elem.content && elem.content.startsWith('data:image')) {
+                if (elem.content && elem.content.startsWith("data:image")) {
                   // Es una imagen base64
-                  console.log('Imagen base64 detectada');
+                  console.log("Imagen base64 detectada");
                   const imgBuffer = await convertirImagenBase64(elem.content);
                   doc.image(imgBuffer, x, y, {
                     width: w,
-                    height: h
+                    height: h,
                   });
                 } else {
                   // Es una ruta de archivo
-                  const imgPath = path.join(__dirname, '..', '..', 'cliente', elem.content);
-                  console.log('Buscando imagen en:', imgPath);
+                  const imgPath = path.join(
+                    __dirname,
+                    "..",
+                    "..",
+                    "cliente",
+                    elem.content,
+                  );
+                  console.log("Buscando imagen en:", imgPath);
                   if (fs.existsSync(imgPath)) {
                     // Verificar que el archivo sea una imagen válida
                     if (esImagenValida(imgPath)) {
                       doc.image(imgPath, x, y, {
                         width: w,
-                        height: h
+                        height: h,
                       });
                     } else {
-                      console.warn(`La imagen ${imgPath} no es un formato válido`);
+                      console.warn(
+                        `La imagen ${imgPath} no es un formato válido`,
+                      );
                     }
                   } else {
                     console.warn(`No se encontró la imagen: ${imgPath}`);
                   }
                 }
               } catch (imgError) {
-                console.error('Error al procesar imagen:', imgError);
+                console.error("Error al procesar imagen:", imgError);
                 // Continuar con el siguiente elemento
               }
               break;
-              
-            case 'foto':
-              console.log('Renderizando foto del usuario');
+
+            case "foto":
+              console.log("Renderizando foto del usuario");
               try {
                 // Si es el elemento foto, usar el campo "foto" de los datos
                 if (data.foto) {
-                  const fotoPath = path.join(__dirname, '..', '..', 'cliente', data.foto);
-                  console.log('Buscando foto en:', fotoPath);
+                  const fotoPath = path.join(
+                    __dirname,
+                    "..",
+                    "..",
+                    "cliente",
+                    data.foto,
+                  );
+                  console.log("Buscando foto en:", fotoPath);
                   if (fs.existsSync(fotoPath)) {
                     // Verificar que el archivo sea una imagen válida
                     if (esImagenValida(fotoPath)) {
                       doc.image(fotoPath, x, y, {
                         width: w,
                         height: h,
-                        fit: [w, h]
+                        fit: [w, h],
                       });
                     } else {
-                      console.warn(`La foto ${fotoPath} no es un formato válido`);
+                      console.warn(
+                        `La foto ${fotoPath} no es un formato válido`,
+                      );
                     }
                   } else {
                     console.warn(`No se encontró la foto: ${fotoPath}`);
                   }
                 } else {
-                  console.warn('No hay foto en los datos del usuario');
+                  console.warn("No hay foto en los datos del usuario");
                 }
               } catch (fotoError) {
-                console.error('Error al procesar foto:', fotoError);
+                console.error("Error al procesar foto:", fotoError);
                 // Continuar con el siguiente elemento
               }
               break;
-              
-            case 'rectangulo':
-              console.log('Renderizando rectángulo');
+
+            case "rectangulo":
+              console.log("Renderizando rectángulo");
               // Guardar estado actual
               const currentStrokeColor = doc._strokeColor;
               const currentFillColorRect = doc._fillColor;
-              
+
               // Dibujar un rectángulo
               if (elem.fillColor) {
                 doc.fillColor(parseColor(elem.fillColor));
@@ -338,7 +432,7 @@ async function generarPDF(data, layoutData, res, modo = 'download') {
                 doc.strokeColor(parseColor(elem.strokeColor));
               }
               doc.rect(x, y, w || 0, h || 0);
-              
+
               if (elem.fillColor && elem.strokeColor) {
                 doc.fillAndStroke();
               } else if (elem.fillColor) {
@@ -346,53 +440,62 @@ async function generarPDF(data, layoutData, res, modo = 'download') {
               } else {
                 doc.stroke();
               }
-              
+
               // Restaurar estado anterior
               if (currentStrokeColor) doc.strokeColor(currentStrokeColor);
               if (currentFillColorRect) doc.fillColor(currentFillColorRect);
               break;
-              
-            case 'linea':
-              console.log('Renderizando línea:', elem.orientation);
-              console.log('Color:', elem.lineColor, 'Grosor:', elem.lineWidth);
-              
+
+            case "linea":
+              console.log("Renderizando línea:", elem.orientation);
+              console.log("Color:", elem.lineColor, "Grosor:", elem.lineWidth);
+
               // Guardar estado actual
               const currentStrokeColorLine = doc._strokeColor;
               const currentLineWidth = doc._lineWidth;
-              
+
               // Establecer color y grosor de línea
               if (elem.lineColor) {
                 doc.strokeColor(parseColor(elem.lineColor));
               }
               if (elem.lineWidth) {
-                doc.lineWidth(Math.max(0.5, parseFloat(elem.lineWidth) * SCALE_Y) || 1);
+                doc.lineWidth(
+                  Math.max(0.5, parseFloat(elem.lineWidth) * SCALE_Y) || 1,
+                );
               }
-              
-              if (elem.orientation === 'vertical') {
+
+              if (elem.orientation === "vertical") {
                 // Línea vertical
                 const altura = h || 100;
-                doc.moveTo(x, y).lineTo(x, y + altura).stroke();
+                doc
+                  .moveTo(x, y)
+                  .lineTo(x, y + altura)
+                  .stroke();
               } else {
                 // Línea horizontal (por defecto)
                 const ancho = w || 100;
-                doc.moveTo(x, y).lineTo(x + ancho, y).stroke();
+                doc
+                  .moveTo(x, y)
+                  .lineTo(x + ancho, y)
+                  .stroke();
               }
-              
+
               // Restaurar estado anterior
-              if (currentStrokeColorLine) doc.strokeColor(currentStrokeColorLine);
+              if (currentStrokeColorLine)
+                doc.strokeColor(currentStrokeColorLine);
               if (currentLineWidth) doc.lineWidth(currentLineWidth);
               break;
-              
-            case 'qr':
-              console.log('Renderizando código QR (no implementado)');
+
+            case "qr":
+              console.log("Renderizando código QR (no implementado)");
               // Si se implementa código QR, se haría aquí
               break;
-              
+
             default:
-              console.warn('Tipo de elemento no reconocido:', elem.type);
+              console.warn("Tipo de elemento no reconocido:", elem.type);
               break;
           }
-          
+
           console.log(`Elemento ${i + 1} renderizado exitosamente`);
         } catch (error) {
           console.error(`Error al renderizar elemento ${i + 1}:`, error);
@@ -404,31 +507,31 @@ async function generarPDF(data, layoutData, res, modo = 'download') {
     await procesar(fondo);
     await procesar(frenteTexto);
   };
-  
+
   // Primera página - Frente de la credencial
-  console.log('\n=== RENDERIZANDO FRENTE ===');
+  console.log("\n=== RENDERIZANDO FRENTE ===");
   doc.addPage(); // Agregar primera página manualmente
   if (layoutData.frente && Array.isArray(layoutData.frente)) {
     await renderizarElementos(layoutData.frente, data);
   } else {
-    console.log('No hay elementos en el frente o no es un array');
+    console.log("No hay elementos en el frente o no es un array");
   }
-  
+
   // Segunda página - Reverso de la credencial
-  console.log('\n=== RENDERIZANDO REVERSO ===');
+  console.log("\n=== RENDERIZANDO REVERSO ===");
   doc.addPage(); // Agregar segunda página
   if (layoutData.reverso && Array.isArray(layoutData.reverso)) {
     await renderizarElementos(layoutData.reverso, data);
   } else {
-    console.log('No hay elementos en el reverso o no es un array');
+    console.log("No hay elementos en el reverso o no es un array");
   }
 
   // Finalizar documento
   doc.end();
-  console.log('=== PDF GENERADO ===');
-  
+  console.log("=== PDF GENERADO ===");
+
   // Si es en modo stream, devolver la ruta del archivo
-  if (modo !== 'download') {
+  if (modo !== "download") {
     return `/uploads/pdfs/credencial_${data.numero_nomina}.pdf`;
   }
 }
