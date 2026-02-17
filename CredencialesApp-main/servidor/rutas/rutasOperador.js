@@ -13,5 +13,6 @@ router.get('/', esAdmin, controladorOperador.obtenerOperadores);
 router.get('/:id', esAdmin, controladorOperador.obtenerOperador);
 router.put('/:id', esAdmin, controladorOperador.actualizarOperador);
 router.delete('/:id', esAdmin, controladorOperador.eliminarOperador);
+router.delete('/:id', estaAutenticado, esAdmin, controladorOperador.eliminarOperador);
 
 module.exports = router;
