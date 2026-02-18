@@ -156,6 +156,10 @@ div.cent {
     background-color: rgb(13,21,40);
 }
 
+thead.Encabezado {
+    background-color: rgb(13,21,40);
+}
+
 /* Animacion del Logo de Android */
 .logo-bounce:hover {
   animation: bounce 0.5s ease-in-out infinite;

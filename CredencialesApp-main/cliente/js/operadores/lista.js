@@ -13,9 +13,11 @@ async function cargarUsuarios() {
       contenedor.innerHTML += `
         <div class="col">
           <div class="card h-100 shadow-sm">
+            <div class=" cent card-header EncaGen">
+              <h5 class="text-white">${usuario.usuario}</h5>
+            </div>
             <div class="card-body text-center">
-              <h5>${usuario.usuario}</h5>
-              <p class="text-muted">${usuario.rol}</p>
+              <p class="text-muted">Rol de cuenta: <b>${usuario.rol}</b></p>
             </div>
             <div class="card-footer d-flex justify-content-between">
               <button class="btn btn-sm btn-outline-danger"
